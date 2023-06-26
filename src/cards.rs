@@ -3,10 +3,11 @@ use std::collections::VecDeque;
 use std::convert::{From, Into};
 use std::iter::FromIterator;
 use std::prelude::v1::derive;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum CardSymbol {
     ACE,
     TWO,
@@ -80,7 +81,7 @@ impl Colors {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy,Debug)]
 pub enum Suit {
     SPADE,
     CLUB,
@@ -108,10 +109,20 @@ impl Suit {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Card {
     pub suit: Suit,
     pub value: CardSymbol,
+}
+
+impl Card {
+    pub fn describe(&self) {
+        println!("Card: color={}, suit={}, value={}",
+                 self.suit.color().to_str(),
+                 self.suit.symbol(),
+                 self.value.to_str()
+        );
+    }
 }
 
 pub struct Deck {
