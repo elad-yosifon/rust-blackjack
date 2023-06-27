@@ -12,8 +12,13 @@ pub struct Hand {
 }
 
 impl Hand {
+
     pub fn new() -> Self {
         Hand { cards: vec![] }
+    }
+
+    pub fn from_cards(cards: Vec<Card>) -> Self {
+        Hand { cards }
     }
 
     pub fn describe(&self) {

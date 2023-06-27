@@ -1,8 +1,10 @@
 use std::borrow::ToOwned;
+use std::clone::Clone;
 use std::collections::VecDeque;
 use std::convert::{From, Into};
 use std::iter::FromIterator;
 use std::prelude::v1::derive;
+use std::string::{String, ToString};
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -46,7 +48,7 @@ impl CardSymbol {
         }
     }
 
-    pub fn to_str(&self) -> &str {
+    pub fn to_string(&self) -> String {
         match &self {
             CardSymbol::ACE => "A",
             CardSymbol::TWO => "2",
@@ -62,7 +64,7 @@ impl CardSymbol {
             CardSymbol::QUEEN => "Q",
             CardSymbol::KING => "K",
             CardSymbol::JOKER => "X"
-        }
+        }.to_string()
     }
 }
 
@@ -81,7 +83,7 @@ impl Colors {
     }
 }
 
-#[derive(Clone, Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum Suit {
     SPADE,
     CLUB,
@@ -113,14 +115,35 @@ impl Suit {
 pub struct Card {
     pub suit: Suit,
     pub value: CardSymbol,
+    pub revealed: bool,
 }
 
 impl Card {
+    fn new(suit: Suit, value: CardSymbol) -> Self {
+        Card {
+            suit,
+            value,
+            revealed: true,
+        }
+    }
+
+    pub fn reveal(&mut self) {
+        self.revealed = true
+    }
+
+    pub fn unreveal(&mut self) {
+        self.revealed = false
+    }
+
+    pub fn is_revealed(&self) -> bool {
+        self.revealed
+    }
+
     pub fn describe(&self) {
         println!("Card: color={}, suit={}, value={}",
                  self.suit.color().to_str(),
                  self.suit.symbol(),
-                 self.value.to_str()
+                 self.value.to_string()
         );
     }
 }
@@ -134,7 +157,7 @@ impl Deck {
         let mut cards: VecDeque<Card> = VecDeque::new();
         let suits = [Suit::SPADE, Suit::HEART, Suit::CLUB, Suit::DIAMOND];
         for &suit in suits.iter() {
-            for value in 1..14 {
+            for value in 1..14 { // skipping joker for now
                 Deck::push_card_from_values(&mut cards, value, suit)
             }
         }
@@ -142,10 +165,7 @@ impl Deck {
     }
 
     fn push_card_from_values(cards: &mut VecDeque<Card>, value: i32, suit: Suit) {
-        let card: Card = Card {
-            value: CardSymbol::from_value(value),
-            suit,
-        };
+        let card: Card = Card::new(suit, CardSymbol::from_value(value));
         cards.push_back(card);
     }
 
