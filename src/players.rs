@@ -4,21 +4,45 @@ use std::vec::Vec;
 
 use crate::cards::Card;
 
-pub struct PlayerState {}
+#[derive(Debug)]
+pub enum HandState {
+    UNDEFINED,
+    FINISHED,
+    BUST,
+    BLACKJACK,
+}
+
+impl HandState {
+    pub fn from_value(value: i32) -> HandState {
+        if value > 21 { return HandState::BUST; }
+        if value == 21 { return HandState::BLACKJACK; }
+        if value < 21 { return HandState::FINISHED; }
+        unreachable!()
+    }
+}
 
 #[derive(Debug)]
 pub struct Hand {
+    pub state: HandState,
+    pub sum: i32,
     pub cards: Vec<Card>,
 }
 
 impl Hand {
-
     pub fn new() -> Self {
-        Hand { cards: vec![] }
+        Hand {
+            cards: vec![],
+            sum: 0,
+            state: HandState::UNDEFINED,
+        }
     }
 
     pub fn from_cards(cards: Vec<Card>) -> Self {
-        Hand { cards }
+        Hand {
+            cards,
+            sum: 0,
+            state: HandState::UNDEFINED,
+        }
     }
 
     pub fn describe(&self) {
