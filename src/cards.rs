@@ -1,10 +1,7 @@
-use std::borrow::ToOwned;
 use std::clone::Clone;
 use std::collections::VecDeque;
-use std::convert::{From, Into};
-use std::iter::FromIterator;
+use std::convert::Into;
 use std::prelude::v1::derive;
-use std::string::{String, ToString};
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -48,7 +45,7 @@ impl CardSymbol {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_str(&self) -> &'static str {
         match &self {
             CardSymbol::ACE => "A",
             CardSymbol::TWO => "2",
@@ -63,8 +60,8 @@ impl CardSymbol {
             CardSymbol::JACK => "J",
             CardSymbol::QUEEN => "Q",
             CardSymbol::KING => "K",
-            CardSymbol::JOKER => "X"
-        }.to_string()
+            CardSymbol::JOKER => "X",
+        }
     }
 }
 
@@ -75,10 +72,11 @@ pub enum Colors {
 }
 
 impl Colors {
-    pub fn to_str(&self) -> &str {
+    #[allow(dead_code)]
+    pub fn to_str(&self) -> &'static str {
         match &self {
             Colors::RED => "RED",
-            Colors::BLACK => "BLACK"
+            Colors::BLACK => "BLACK",
         }
     }
 }
@@ -92,6 +90,7 @@ pub enum Suit {
 }
 
 impl Suit {
+    #[allow(dead_code)]
     pub fn color(&self) -> Colors {
         match self {
             Suit::SPADE => Colors::BLACK,
@@ -101,7 +100,7 @@ impl Suit {
         }
     }
 
-    pub fn symbol(&self) -> &str {
+    pub fn to_str(&self) -> &'static str {
         match self {
             Suit::SPADE => "S",
             Suit::CLUB => "C",
@@ -140,10 +139,11 @@ impl Card {
     }
 
     pub fn describe(&self) {
-        println!("Card: color={}, suit={}, value={}",
-                 self.suit.color().to_str(),
-                 self.suit.symbol(),
-                 self.value.to_string()
+        println!(
+            "Card: color={}, suit={}, value={}",
+            self.suit.color().to_str(),
+            self.suit.to_str(),
+            self.value.to_str()
         );
     }
 }
@@ -157,7 +157,8 @@ impl Deck {
         let mut cards: VecDeque<Card> = VecDeque::new();
         let suits = [Suit::SPADE, Suit::HEART, Suit::CLUB, Suit::DIAMOND];
         for &suit in suits.iter() {
-            for value in 1..14 { // skipping joker for now
+            for value in 1..14 {
+                // skipping joker for now
                 Deck::push_card_from_values(&mut cards, value, suit)
             }
         }
@@ -171,9 +172,9 @@ impl Deck {
 
     pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
-        let mut slice = self.cards.make_contiguous();
+        let slice = self.cards.make_contiguous();
         slice.shuffle(&mut rng);
-        let mut new_deck: VecDeque<Card> = slice.to_vec().into();
+        let new_deck: VecDeque<Card> = slice.to_vec().into();
         self.cards = new_deck;
     }
 }

@@ -1,7 +1,7 @@
-use std::convert::Into;
-use std::ops::{Index, IndexMut};
+use std::ops::IndexMut;
 use std::vec::Vec;
 
+use crate::at;
 use crate::cards::Card;
 
 #[derive(Debug)]
@@ -14,9 +14,15 @@ pub enum HandState {
 
 impl HandState {
     pub fn from_value(value: i32) -> HandState {
-        if value > 21 { return HandState::BUST; }
-        if value == 21 { return HandState::BLACKJACK; }
-        if value < 21 { return HandState::FINISHED; }
+        if value > 21 {
+            return HandState::BUST;
+        }
+        if value == 21 {
+            return HandState::BLACKJACK;
+        }
+        if value < 21 {
+            return HandState::FINISHED;
+        }
         unreachable!()
     }
 }
@@ -37,6 +43,7 @@ impl Hand {
         }
     }
 
+    #[allow(dead_code)]
     pub fn from_cards(cards: Vec<Card>) -> Self {
         Hand {
             cards,
@@ -45,10 +52,21 @@ impl Hand {
         }
     }
 
+    #[allow(dead_code)]
     pub fn describe(&self) {
         for &card in self.cards.iter() {
             card.describe()
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn card_at(&self, at: usize) -> &Card {
+        at!(self.cards, at)
+    }
+
+    #[allow(dead_code)]
+    pub fn card_at_mut(&mut self, at: usize) -> &mut Card {
+        at!(mut self.cards, at)
     }
 }
 
@@ -56,6 +74,15 @@ impl Hand {
 pub enum PlayerRole {
     PLAYER,
     DEALER,
+}
+
+impl PlayerRole {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PlayerRole::PLAYER => "player",
+            PlayerRole::DEALER => "dealer",
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -71,6 +98,14 @@ impl Player {
 
     pub fn deal_card_at_hand(&mut self, hand_index: usize, card: Card) {
         self.hands.index_mut(hand_index).cards.push(card)
+    }
+
+    pub fn hand_at(&self, at: usize) -> &Hand {
+        at!(self.hands, at)
+    }
+
+    pub fn hand_at_mut(&mut self, at: usize) -> &mut Hand {
+        at!(mut self.hands, at)
     }
 }
 
