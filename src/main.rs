@@ -33,16 +33,22 @@ fn main() {
         // println!("{:?}", actors);
 
         blackjack_play_round(&mut actors);
-        simulate_think!(2);
 
+        simulate_think!(1);
         blackjack_judge_round(&actors);
-        simulate_think!(2);
 
-        match read_stdin_str!("Another round? [y/n]") {
-            "y" | "yes" => continue,
-            _ => {
-                println!("Thanks for playing, bye :)");
-                exit(0);
+        simulate_think!(2);
+        loop {
+            match read_stdin_str!("\nAnother round? [y/n]:").to_lowercase().as_str() {
+                "y" | "yes" => break,
+                "n" | "no" => {
+                    println!("Thanks for playing, bye :)");
+                    exit(0);
+                }
+                _ => {
+                    println!("Invalid command.");
+                    continue;
+                }
             }
         }
     }

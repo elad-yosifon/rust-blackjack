@@ -4,9 +4,9 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::vec::Vec;
 
+use crate::{actor_at, deal_card, read_stdin_str, read_stdin_string, simulate_think};
 use crate::cards::{CardSymbol, Deck};
 use crate::players::{Hand, HandState, Player};
-use crate::{actor_at, deal_card, read_stdin_str, read_stdin_string, simulate_think};
 
 fn blackjack_card_value(card_symbol: &CardSymbol) -> i32 {
     match card_symbol {
@@ -134,11 +134,11 @@ pub fn blackjack_play_round(actors: &mut Vec<Player>) {
 
         match user_action() {
             UserAction::HIT => {
-                println!("User --> Hit \n");
+                println!("User --> HIT \n");
                 deal_card!(actor_at!(mut actors, 0), deck);
             }
             UserAction::STAY => {
-                println!("User --> Stay \n");
+                println!("User --> STAY \n");
                 break;
             }
         }
@@ -159,12 +159,12 @@ pub fn blackjack_play_round(actors: &mut Vec<Player>) {
         let dealer = actor_at!(actors, 1);
         match dealer.hand_at(0).sum {
             1..17 => {
-                println!("Dealer --> Hit \n");
+                println!("Dealer --> HIT \n");
                 deal_card!(actor_at!(mut actors, 1), deck);
                 continue;
             }
             17..21 => {
-                println!("Dealer --> Stay \n");
+                println!("Dealer --> STAY \n");
                 break;
             }
             21 => {
@@ -216,7 +216,10 @@ enum UserAction {
 
 fn user_action() -> UserAction {
     loop {
-        match read_stdin_str!("Hit(h)|Stay(s)?") {
+        match read_stdin_str!("STAY or HIT? [s/h]:")
+            .to_lowercase()
+            .as_str()
+        {
             "h" | "hit" => {
                 return UserAction::HIT;
             }
