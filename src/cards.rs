@@ -1,12 +1,11 @@
 use std::clone::Clone;
 use std::collections::VecDeque;
-use std::convert::Into;
 use std::prelude::v1::derive;
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(PartialEq, Debug)]
 pub enum CardSymbol {
     ACE,
     TWO,
@@ -110,7 +109,7 @@ impl Suit {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug)]
 pub struct Card {
     pub suit: Suit,
     pub value: CardSymbol,
@@ -153,28 +152,31 @@ pub struct Deck {
 }
 
 impl Deck {
+    #[allow(dead_code)]
     pub fn new() -> Self {
-        let mut cards: VecDeque<Card> = VecDeque::new();
+        Self {
+            cards: VecDeque::from(Self::fresh_cards_vec()),
+        }
+    }
+
+    pub fn new_shuffled() -> Self {
+        let mut cards = Self::fresh_cards_vec();
+        let mut rng = thread_rng();
+        cards.shuffle(&mut rng);
+        Self {
+            cards: VecDeque::from(cards),
+        }
+    }
+
+    fn fresh_cards_vec() -> Vec<Card> {
+        let mut cards: Vec<Card> = Vec::new();
         let suits = [Suit::SPADE, Suit::HEART, Suit::CLUB, Suit::DIAMOND];
         for &suit in suits.iter() {
             for value in 1..14 {
                 // skipping joker for now
-                Deck::push_card_from_values(&mut cards, value, suit)
+                cards.push(Card::new(suit, CardSymbol::from_value(value)));
             }
         }
-        Self { cards }
-    }
-
-    fn push_card_from_values(cards: &mut VecDeque<Card>, value: i32, suit: Suit) {
-        let card: Card = Card::new(suit, CardSymbol::from_value(value));
-        cards.push_back(card);
-    }
-
-    pub fn shuffle(&mut self) {
-        let mut rng = thread_rng();
-        let slice = self.cards.make_contiguous();
-        slice.shuffle(&mut rng);
-        let new_deck: VecDeque<Card> = slice.to_vec().into();
-        self.cards = new_deck;
+        cards
     }
 }

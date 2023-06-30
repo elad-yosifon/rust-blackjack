@@ -29,13 +29,11 @@ macro_rules! simulate_think {
     };
 }
 
-//TODO: deal to a hand
 #[macro_export]
-macro_rules! deal_card {
-    ($player:expr, $deck:expr) => {
-        $player.deal_card($deck.cards.pop_front().unwrap())
+macro_rules! draw_card {
+    ($deck:expr) => {
+        $deck.cards.pop_front().unwrap()
     };
-
 }
 
 #[macro_export]

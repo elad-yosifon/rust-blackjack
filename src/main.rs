@@ -5,18 +5,11 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use crate::blackjack::{blackjack_judge_round, blackjack_play_round};
-use crate::players::Player;
 
 mod blackjack;
 mod cards;
 mod macros;
 mod players;
-
-#[allow(dead_code)]
-struct Game {}
-
-#[allow(dead_code)]
-struct Round {}
 
 fn main() {
     let number_of_players = 1;
@@ -27,15 +20,10 @@ fn main() {
     }
 
     loop {
-        let dealer = Player::new_dealer();
-        let user = Player::new();
-        let mut actors = vec![user, dealer];
-        // println!("{:?}", actors);
-
-        blackjack_play_round(&mut actors);
+        let round = blackjack_play_round(1);
 
         simulate_think!(1);
-        blackjack_judge_round(&actors);
+        blackjack_judge_round(&round.actors);
 
         simulate_think!(2);
         loop {

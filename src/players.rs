@@ -1,4 +1,4 @@
-use std::ops::IndexMut;
+use std::collections::VecDeque;
 use std::vec::Vec;
 
 use crate::at;
@@ -21,7 +21,7 @@ impl HandState {
             return HandState::BLACKJACK;
         }
         if value < 21 {
-            return HandState::FINISHED;
+            return HandState::UNDEFINED;
         }
         unreachable!()
     }
@@ -31,13 +31,22 @@ impl HandState {
 pub struct Hand {
     pub state: HandState,
     pub sum: i32,
-    pub cards: Vec<Card>,
+    pub cards: VecDeque<Card>,
+}
+
+impl Hand {
+    pub fn splitable(&self) -> bool {
+        if self.cards.len() == 2 && self.card_at(0).value == self.card_at(1).value {
+            return true;
+        }
+        false
+    }
 }
 
 impl Hand {
     pub fn new() -> Self {
         Hand {
-            cards: vec![],
+            cards: VecDeque::new(),
             sum: 0,
             state: HandState::UNDEFINED,
         }
@@ -46,7 +55,7 @@ impl Hand {
     #[allow(dead_code)]
     pub fn from_cards(cards: Vec<Card>) -> Self {
         Hand {
-            cards,
+            cards: VecDeque::from(cards),
             sum: 0,
             state: HandState::UNDEFINED,
         }
@@ -54,7 +63,7 @@ impl Hand {
 
     #[allow(dead_code)]
     pub fn describe(&self) {
-        for &card in self.cards.iter() {
+        for card in self.cards.iter() {
             card.describe()
         }
     }
@@ -67,6 +76,17 @@ impl Hand {
     #[allow(dead_code)]
     pub fn card_at_mut(&mut self, at: usize) -> &mut Card {
         at!(mut self.cards, at)
+    }
+
+    pub fn deal_card(&mut self, card: Card) {
+        self.cards.push_back(card)
+    }
+
+    pub fn split(&mut self, card_0_1: Card, card_1_1: Card) -> Hand {
+        let card_1_0 = self.cards.pop_back().unwrap();
+        self.cards.push_back(card_0_1);
+        let new_hand = Hand::from_cards(vec![card_1_0, card_1_1]);
+        new_hand
     }
 }
 
@@ -92,14 +112,6 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn deal_card(&mut self, card: Card) {
-        self.deal_card_at_hand(0, card)
-    }
-
-    pub fn deal_card_at_hand(&mut self, hand_index: usize, card: Card) {
-        self.hands.index_mut(hand_index).cards.push(card)
-    }
-
     pub fn hand_at(&self, at: usize) -> &Hand {
         at!(self.hands, at)
     }
@@ -110,17 +122,10 @@ impl Player {
 }
 
 impl Player {
-    pub fn new_dealer() -> Self {
-        Self {
-            role: PlayerRole::DEALER,
-            hands: vec![Hand::new()],
-        }
-    }
-
-    pub fn new() -> Self {
+    pub fn new(hand: Hand) -> Self {
         Self {
             role: PlayerRole::PLAYER,
-            hands: vec![Hand::new()],
+            hands: vec![hand],
         }
     }
 }
