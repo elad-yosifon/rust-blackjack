@@ -5,10 +5,11 @@ use std::thread::sleep;
 use std::time::Duration;
 use std::vec::Vec;
 
-use crate::{actor_at, at};
+use crate::actor_at;
 use crate::{draw_card, simulate_think};
 use crate::{read_stdin_str, read_stdin_string};
-use crate::cards::{CardSymbol, Deck};
+use crate::cards::card::CardSymbol;
+use crate::cards::deck::Deck;
 use crate::players::{Hand, HandState, Player, PlayerRole};
 
 pub fn blackjack_card_value(card_symbol: &CardSymbol) -> i32 {
@@ -159,7 +160,7 @@ pub fn blackjack_play_round(number_of_user_players: usize) -> Round {
                 }
 
                 loop {
-                    let hand = at!(mut player.hands, hand_cursor);
+                    let hand = player.hand_at_mut(hand_cursor);
                     match hand.state {
                         HandState::FINISHED => {
                             hand_cursor += 1;

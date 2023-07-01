@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::vec::Vec;
 
 use crate::at;
-use crate::cards::Card;
+use crate::cards::card::Card;
 
 #[derive(Debug)]
 pub enum HandState {
