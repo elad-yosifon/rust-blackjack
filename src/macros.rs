@@ -31,28 +31,11 @@ macro_rules! simulate_think {
 }
 
 #[macro_export]
-macro_rules! draw_card {
-    ($deck:expr) => {
-        $deck.cards.pop_front().unwrap()
-    };
-}
-
-#[macro_export]
 macro_rules! at {
     ($vec:expr, $at:expr) => {
         $vec.get($at).unwrap()
     };
     (mut $vec:expr, $at:expr) => {
         $vec.get_mut($at).unwrap()
-    };
-}
-
-#[macro_export]
-macro_rules! actor_at {
-    ($actors:expr, $at:expr) => {
-        $actors.get($at).unwrap()
-    };
-    (mut $actors:expr, $at:expr) => {
-        $actors.get_mut($at).unwrap()
     };
 }

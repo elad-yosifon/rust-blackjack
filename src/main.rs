@@ -1,14 +1,13 @@
 #![feature(exclusive_range_pattern)]
 
 use std::process::exit;
-use gameplay::round::blackjack_play_round;
+use gameplay::round::blackjack_round;
 use crate::gameplay::round::blackjack_judge_round;
 
 
 mod gameplay;
 mod cards;
 mod macros;
-mod players;
 
 fn main() {
     let number_of_players = 1;
@@ -19,10 +18,11 @@ fn main() {
     }
 
     loop {
-        let round = blackjack_play_round(1);
+        let mut round = blackjack_round(1);
+        round.play();
 
         simulate_think!(1);
-        blackjack_judge_round(&round.actors);
+        blackjack_judge_round(&round);
 
         simulate_think!(2);
         loop {

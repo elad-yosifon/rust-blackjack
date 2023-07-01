@@ -37,4 +37,8 @@ impl Deck {
         }
         cards
     }
+
+    pub fn draw_card(&mut self) -> Card {
+        self.cards.pop_front().unwrap()
+    }
 }

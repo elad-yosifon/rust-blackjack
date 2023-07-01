@@ -95,6 +95,7 @@ impl Suit {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_str(&self) -> &'static str {
         match self {
             Suit::SPADE => "S",
@@ -133,12 +134,4 @@ impl Card {
         self.revealed
     }
 
-    pub fn describe(&self) {
-        println!(
-            "Card: color={}, suit={}, value={}",
-            self.suit.color().to_str(),
-            self.suit.to_str(),
-            self.value.to_str()
-        );
-    }
 }
