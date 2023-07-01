@@ -153,6 +153,7 @@ pub fn blackjack_play_round(number_of_user_players: usize) -> Round {
             PlayerRole::PLAYER => {
                 let hand_count = player.hands.len();
                 if hand_cursor >= hand_count {
+                    hand_cursor = 0;
                     player_cursor += 1;
                     continue;
                 }
