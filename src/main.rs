@@ -1,12 +1,11 @@
 #![feature(exclusive_range_pattern)]
 
 use std::process::exit;
-use std::thread::sleep;
-use std::time::Duration;
+use gameplay::round::blackjack_play_round;
+use crate::gameplay::round::blackjack_judge_round;
 
-use crate::blackjack::{blackjack_judge_round, blackjack_play_round};
 
-mod blackjack;
+mod gameplay;
 mod cards;
 mod macros;
 mod players;

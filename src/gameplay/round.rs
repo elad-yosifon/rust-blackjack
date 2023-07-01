@@ -1,132 +1,9 @@
 use std::collections::VecDeque;
-use std::iter::Iterator;
-use std::string::{String, ToString};
-use std::thread::sleep;
-use std::time::Duration;
-use std::vec::Vec;
 
-use crate::actor_at;
-use crate::{draw_card, simulate_think};
-use crate::{read_stdin_str, read_stdin_string};
 use crate::cards::card::CardSymbol;
 use crate::cards::deck::Deck;
 use crate::players::{Hand, HandState, Player, PlayerRole};
-
-pub fn blackjack_card_value(card_symbol: &CardSymbol) -> i32 {
-    match card_symbol {
-        CardSymbol::TWO => 2,
-        CardSymbol::THREE => 3,
-        CardSymbol::FOUR => 4,
-        CardSymbol::FIVE => 5,
-        CardSymbol::SIX => 6,
-        CardSymbol::SEVEN => 7,
-        CardSymbol::EIGHT => 8,
-        CardSymbol::NINE => 9,
-        CardSymbol::TEN | CardSymbol::JACK | CardSymbol::QUEEN | CardSymbol::KING => 10,
-        CardSymbol::ACE => 11,
-        CardSymbol::JOKER => 0,
-    }
-}
-
-fn blackjack_update_hand_state(hand: &mut Hand) {
-    let mut sum = 0;
-    let mut number_of_aces = 0;
-    for card in hand.cards.iter() {
-        let value = &card.value;
-        assert_ne!(matches!(value, CardSymbol::JOKER), true);
-        sum += blackjack_card_value(&value);
-        if matches!(value, CardSymbol::ACE) {
-            number_of_aces += 1;
-        }
-    }
-
-    while number_of_aces > 0 {
-        if sum <= 21 {
-            break;
-        }
-        sum -= 10;
-        number_of_aces -= 1;
-    }
-
-    hand.sum = sum;
-
-    if matches!(hand.state, HandState::UNDEFINED) {
-        hand.state = HandState::from_value(hand.sum);
-    }
-}
-
-fn blackjack_describe_hand(hand: &Hand) -> String {
-    let mut strings = Vec::new();
-    let mut fully_revealed = true;
-    for card in hand.cards.iter() {
-        let symbol = &card.value;
-        assert_ne!(matches!(symbol, CardSymbol::JOKER), true);
-        if card.is_revealed() {
-            strings.push(symbol.to_str().to_string());
-        } else {
-            fully_revealed = false;
-            strings.push("X".to_string());
-        }
-    }
-
-    let mut hand_str = strings.join(" + ");
-    if fully_revealed {
-        hand_str.push_str(format!(" = {}", hand.sum).as_str());
-    } else {
-        hand_str.push_str(" = ?");
-    }
-
-    hand_str
-}
-
-pub fn blackjack_judge_round(actors: &Vec<Player>) {
-    let dealer_hand = actors.last().unwrap().hand_at(0);
-    for actor_idx in 0..actors.len() - 1 {
-        let actor_name = format!("User_{}", actor_idx + 1);
-        actor_at!(actors, actor_idx)
-            .hands
-            .iter()
-            .for_each(|user_hand| match (&user_hand.state, &dealer_hand.state) {
-                (HandState::FINISHED, HandState::FINISHED) => {
-                    if user_hand.sum == dealer_hand.sum {
-                        println!(
-                            "Draw <-- {} and Dealer got same value={}!",
-                            actor_name, dealer_hand.sum
-                        );
-                    } else if user_hand.sum > dealer_hand.sum {
-                        println!(
-                            "{} Won <-- value={} > Dealer value={}",
-                            actor_name, user_hand.sum, dealer_hand.sum
-                        );
-                    } else {
-                        println!(
-                            "{} Lost <-- value={} < Dealer value={}",
-                            actor_name, user_hand.sum, dealer_hand.sum
-                        );
-                    }
-                }
-                (HandState::BLACKJACK, HandState::BLACKJACK) => {
-                    println!("Draw <-- {} and Dealer both got BLACKJACK!", actor_name);
-                }
-                (HandState::BLACKJACK, _) => {
-                    println!("{} Won <-- {0} have BLACKJACK!", actor_name);
-                }
-                (HandState::FINISHED, HandState::BUST) => {
-                    println!("{} Won <-- Dealer is BUSTED!", actor_name);
-                }
-                (HandState::BUST, _) => {
-                    println!("{} Lost <-- {0} is BUSTED!", actor_name);
-                }
-                (_, HandState::BLACKJACK) => {
-                    println!("{} Lost <-- Dealer has BLACKJACK!", actor_name);
-                }
-                (HandState::UNDEFINED, _) | (_, HandState::UNDEFINED) => unreachable!(),
-            });
-    }
-}
-
-#[allow(dead_code)]
-struct Game {}
+use crate::{actor_at, draw_card, read_stdin_str, simulate_think};
 
 pub struct Round {
     pub actors: Vec<Player>,
@@ -291,6 +168,48 @@ fn blackjack_update_current_game_state(actors: &mut Vec<Player>) {
     }
 }
 
+pub fn blackjack_card_value(card_symbol: &CardSymbol) -> i32 {
+    match card_symbol {
+        CardSymbol::TWO => 2,
+        CardSymbol::THREE => 3,
+        CardSymbol::FOUR => 4,
+        CardSymbol::FIVE => 5,
+        CardSymbol::SIX => 6,
+        CardSymbol::SEVEN => 7,
+        CardSymbol::EIGHT => 8,
+        CardSymbol::NINE => 9,
+        CardSymbol::TEN | CardSymbol::JACK | CardSymbol::QUEEN | CardSymbol::KING => 10,
+        CardSymbol::ACE => 11,
+        CardSymbol::JOKER => 0,
+    }
+}
+fn blackjack_update_hand_state(hand: &mut Hand) {
+    let mut sum = 0;
+    let mut number_of_aces = 0;
+    for card in hand.cards.iter() {
+        let value = &card.value;
+        assert_ne!(matches!(value, CardSymbol::JOKER), true);
+        sum += blackjack_card_value(&value);
+        if matches!(value, CardSymbol::ACE) {
+            number_of_aces += 1;
+        }
+    }
+
+    while number_of_aces > 0 {
+        if sum <= 21 {
+            break;
+        }
+        sum -= 10;
+        number_of_aces -= 1;
+    }
+
+    hand.sum = sum;
+
+    if matches!(hand.state, HandState::UNDEFINED) {
+        hand.state = HandState::from_value(hand.sum);
+    }
+}
+
 enum UserAction {
     HIT,
     STAY,
@@ -335,5 +254,74 @@ fn blackjack_prompt_user_action(hand: &mut Hand) -> UserAction {
                 }
             }
         }
+    }
+}
+
+fn blackjack_describe_hand(hand: &Hand) -> String {
+    let mut strings = Vec::new();
+    let mut fully_revealed = true;
+    for card in hand.cards.iter() {
+        let symbol = &card.value;
+        assert_ne!(matches!(symbol, CardSymbol::JOKER), true);
+        if card.is_revealed() {
+            strings.push(symbol.to_str().to_string());
+        } else {
+            fully_revealed = false;
+            strings.push("X".to_string());
+        }
+    }
+
+    let mut hand_str = strings.join(" + ");
+    if fully_revealed {
+        hand_str.push_str(format!(" = {}", hand.sum).as_str());
+    } else {
+        hand_str.push_str(" = ?");
+    }
+
+    hand_str
+}
+pub fn blackjack_judge_round(actors: &Vec<Player>) {
+    let dealer_hand = actors.last().unwrap().hand_at(0);
+    for actor_idx in 0..actors.len() - 1 {
+        let actor_name = format!("User_{}", actor_idx + 1);
+        actor_at!(actors, actor_idx)
+            .hands
+            .iter()
+            .for_each(|user_hand| match (&user_hand.state, &dealer_hand.state) {
+                (HandState::FINISHED, HandState::FINISHED) => {
+                    if user_hand.sum == dealer_hand.sum {
+                        println!(
+                            "Draw <-- {} and Dealer got same value={}!",
+                            actor_name, dealer_hand.sum
+                        );
+                    } else if user_hand.sum > dealer_hand.sum {
+                        println!(
+                            "{} Won <-- value={} > Dealer value={}",
+                            actor_name, user_hand.sum, dealer_hand.sum
+                        );
+                    } else {
+                        println!(
+                            "{} Lost <-- value={} < Dealer value={}",
+                            actor_name, user_hand.sum, dealer_hand.sum
+                        );
+                    }
+                }
+                (HandState::BLACKJACK, HandState::BLACKJACK) => {
+                    println!("Draw <-- {} and Dealer both got BLACKJACK!", actor_name);
+                }
+                (HandState::BLACKJACK, _) => {
+                    println!("{} Won <-- {0} have BLACKJACK!", actor_name);
+                }
+                (HandState::FINISHED, HandState::BUST) => {
+                    println!("{} Won <-- Dealer is BUSTED!", actor_name);
+                }
+                (HandState::BUST, _) => {
+                    println!("{} Lost <-- {0} is BUSTED!", actor_name);
+                }
+                (_, HandState::BLACKJACK) => {
+                    println!("{} Lost <-- Dealer has BLACKJACK!", actor_name);
+                }
+                (HandState::UNDEFINED, _) | (_, HandState::UNDEFINED) => unreachable!(),
+            });
     }
 }
