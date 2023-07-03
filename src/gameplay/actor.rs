@@ -5,27 +5,28 @@ use crate::gameplay::hand::Hand;
 
 
 #[derive(Debug)]
-pub enum PlayerRole {
+pub enum ActorRole {
     PLAYER,
     DEALER,
 }
 
-impl PlayerRole {
+impl ActorRole {
     pub fn as_str(&self) -> &'static str {
         match self {
-            PlayerRole::PLAYER => "player",
-            PlayerRole::DEALER => "dealer",
+            ActorRole::PLAYER => "player",
+            ActorRole::DEALER => "dealer",
         }
     }
 }
 
 #[derive(Debug)]
-pub struct Player {
-    pub role: PlayerRole,
+pub struct Actor {
+    pub role: ActorRole,
     pub hands: Vec<Hand>,
+    pub actor_idx: usize,
 }
 
-impl Player {
+impl Actor {
     pub fn hand_at(&self, at: usize) -> &Hand {
         at!(self.hands, at)
     }
@@ -34,9 +35,10 @@ impl Player {
         at!(mut self.hands, at)
     }
 
-    pub fn new(hand: Hand) -> Self {
+    pub fn new(actor_idx:usize, hand: Hand) -> Self {
         Self {
-            role: PlayerRole::PLAYER,
+            actor_idx,
+            role: ActorRole::PLAYER,
             hands: vec![hand],
         }
     }
