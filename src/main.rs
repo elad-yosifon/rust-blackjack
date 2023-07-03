@@ -2,22 +2,29 @@
 
 use std::process::exit;
 use std::vec;
+
 use gameplay::round::blackjack_round;
+
 use crate::gameplay::game::Game;
 
-
-mod gameplay;
 mod cards;
+mod gameplay;
 mod macros;
 
 fn main() {
-
     let minimum_bet = 10;
-    let number_of_players = read_stdin!("player count?", usize);
+    let number_of_players = match take_stdin_key!("Number of players? [1/2/3]", '1', '2', '3') {
+        '1' => 1,
+        '2' => 2,
+        '3' => 3,
+        _ => 0,
+    };
 
     if 1 > number_of_players || number_of_players > 4 {
-        println!("Game can start with 1-4 players");
+        println!("Game can start with 1-3 players");
         exit(-1);
+    } else {
+        println!("{}",number_of_players);
     }
 
     let player_scores = vec![minimum_bet * 10; number_of_players];
@@ -25,7 +32,7 @@ fn main() {
     let player_names = vec![""; number_of_players]
         .iter()
         .enumerate()
-        .map(|(idx, _)| format!("User_{}", idx+1))
+        .map(|(idx, _)| format!("User_{}", idx + 1))
         .collect();
 
     let mut game = Game {
@@ -34,9 +41,7 @@ fn main() {
         player_names,
     };
 
-
     loop {
-
         game.current_round.play();
 
         simulate_think!(1);
@@ -46,13 +51,13 @@ fn main() {
         game.print_player_scores();
 
         loop {
-            match read_stdin_str!("\nAnother round? [y/n]:").to_lowercase().as_str() {
-                "y" | "yes" => {
-
+            println!();
+            match take_stdin_key!("Another round? [y/n]:", 'y','n') {
+                'y' => {
                     game.current_round = blackjack_round(number_of_players, minimum_bet);
-                    break
-                },
-                "n" | "no" => {
+                    break;
+                }
+                'n' => {
                     println!("Thanks for playing, bye :)");
                     exit(0);
                 }

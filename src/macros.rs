@@ -1,25 +1,53 @@
 #[macro_export]
-macro_rules! read_stdin_string {
-    ($msg:expr) => {{
-        use std::string::{String, ToString};
+macro_rules! take_stdin_key {
+    ($msg:expr $(,$char:literal)*) => {{
         println!("{}", $msg);
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-        input.trim().to_string()
+        use std::io::{stdin, stdout, Write};
+        use termion::event::Key;
+        use termion::input::TermRead;
+        use termion::raw::IntoRawMode;
+
+        let mut stdout = stdout().into_raw_mode().unwrap();
+        let stdin = stdin();
+        let mut xc = '\0';
+        for c in stdin.keys() {
+            let x = match c.unwrap() {
+                $(Key::Char($char) => $char,)*
+                _ => '\0'
+            };
+
+            if x != '\0' {
+                stdout.flush().unwrap();
+                xc = x;
+                break;
+            }
+        }
+        xc.clone()
+    }}
+}
+
+#[macro_export]
+macro_rules! take_stdin_string {
+    ($msg:expr, $take:literal) => {{
+        println!("{}", $msg);
+        use std::string::{String};
+        let mut s = String::new();
+        std::io::stdin().read_line(&mut s).unwrap();
+        s.as_str().trim().to_string()
     }};
 }
 
 #[macro_export]
-macro_rules! read_stdin {
-    ($msg:expr, $t:ty) => {{
-        crate::read_stdin_string!($msg).parse::<$t>().unwrap()
-    }};
+macro_rules! take_stdin {
+    ($msg:expr, $t:ty, $take:literal) => {
+        crate::take_stdin_string!($msg,$take).parse::<$t>().unwrap()
+    };
 }
 
 #[macro_export]
-macro_rules! read_stdin_str {
-    ($msg:expr) => {
-        crate::read_stdin_string!($msg).as_str()
+macro_rules! take_stdin_str {
+    ($msg:expr, $take:literal) => {
+        crate::take_stdin_string!($msg).as_str()
     };
 }
 

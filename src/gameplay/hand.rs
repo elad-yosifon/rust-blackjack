@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::cards::card::{Card, CardSymbol};
 use crate::gameplay::blackjack::{blackjack_card_value, UserAction};
-use crate::{at, read_stdin_str};
+use crate::{at, take_stdin_key};
 
 #[derive(Debug)]
 pub enum HandState {
@@ -131,17 +131,14 @@ impl Hand {
     pub(crate) fn prompt_user_action(&self) -> UserAction {
         loop {
             if self.splitable() {
-                match read_stdin_str!("STAY or HIT or SPLIT? [s/h/x]:")
-                    .to_lowercase()
-                    .as_str()
-                {
-                    "h" | "hit" => {
+                match take_stdin_key!("STAY or HIT or SPLIT? [s/h/x]:", 's','h','x') {
+                    'h' => {
                         return UserAction::HIT;
                     }
-                    "s" | "stay" => {
+                    's' => {
                         return UserAction::STAY;
                     }
-                    "x" | "split" => {
+                    'x'  => {
                         return UserAction::SPLIT;
                     }
                     _ => {
@@ -150,14 +147,11 @@ impl Hand {
                     }
                 }
             } else {
-                match read_stdin_str!("STAY or HIT? [s/h]:")
-                    .to_lowercase()
-                    .as_str()
-                {
-                    "h" | "hit" => {
+                match take_stdin_key!("STAY or HIT? [s/h]:", 's','h'){
+                    'h' => {
                         return UserAction::HIT;
                     }
-                    "s" | "stay" => {
+                    's' => {
                         return UserAction::STAY;
                     }
                     _ => {
