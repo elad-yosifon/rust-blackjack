@@ -1,8 +1,8 @@
 use crate::cards::deck::Deck;
 use crate::gameplay::actor::{Actor, ActorRole};
-use crate::{at, simulate_think};
 use crate::gameplay::blackjack::UserAction;
 use crate::gameplay::hand::{Hand, HandState};
+use crate::{at, simulate_think};
 
 pub struct Round {
     pub deck: Deck,
@@ -23,10 +23,10 @@ impl Round {
         loop {
             let actor = at!(mut self.actors, actor_cursor);
             match actor.role {
-                ActorRole::DEALER => {
+                ActorRole::Dealer => {
                     break;
                 }
-                ActorRole::PLAYER => {
+                ActorRole::Player => {
                     let hand_count = actor.hands.len();
                     if hand_cursor >= hand_count {
                         hand_cursor = 0;
@@ -34,46 +34,38 @@ impl Round {
                         continue;
                     }
 
-                    loop {
-                        let hand = actor.hand_at_mut(hand_cursor);
-                        match hand.state {
-                            HandState::FINISHED => {
-                                hand_cursor += 1;
-                                break;
-                            }
-                            HandState::BUST => {
-                                println!("Hand --> BUST \n");
-                                hand_cursor += 1;
-                                break;
-                            }
-                            HandState::BLACKJACK => {
-                                println!("Hand --> BlackJack! \n");
-                                hand_cursor += 1;
-                                break;
-                            }
-                            HandState::UNDEFINED => {
-                                match hand.prompt_user_action() {
-                                    UserAction::HIT => {
-                                        println!("Hand --> HIT \n");
-                                        hand.deal_card(self.deck.draw_card());
-                                        self.update();
-                                    }
-                                    UserAction::SPLIT => {
-                                        println!("Hand --> SPLIT \n");
-                                        let new_hand =
-                                            hand.split(self.deck.draw_card(), self.deck.draw_card());
-                                        actor.hands.insert(hand_cursor + 1, new_hand);
-                                        self.update();
-                                    }
-                                    UserAction::STAY => {
-                                        println!("Hand --> STAY \n");
-                                        hand.state = HandState::FINISHED;
-                                        hand_cursor += 1;
-                                    }
-                                }
-                                break;
-                            }
+                    let hand = actor.hand_at_mut(hand_cursor);
+                    match hand.state {
+                        HandState::Finished => {
+                            hand_cursor += 1;
                         }
+                        HandState::Bust => {
+                            println!("Hand --> BUST \n");
+                            hand_cursor += 1;
+                        }
+                        HandState::Blackjack => {
+                            println!("Hand --> BlackJack! \n");
+                            hand_cursor += 1;
+                        }
+                        HandState::Undefined => match hand.prompt_user_action() {
+                            UserAction::Hit => {
+                                println!("Hand --> HIT \n");
+                                hand.deal_card(self.deck.draw_card());
+                                self.update();
+                            }
+                            UserAction::Split => {
+                                println!("Hand --> SPLIT \n");
+                                let new_hand =
+                                    hand.split(self.deck.draw_card(), self.deck.draw_card());
+                                actor.hands.insert(hand_cursor + 1, new_hand);
+                                self.update();
+                            }
+                            UserAction::Stay => {
+                                println!("Hand --> STAY \n");
+                                hand.state = HandState::Finished;
+                                hand_cursor += 1;
+                            }
+                        },
                     }
                 }
             }
@@ -81,9 +73,7 @@ impl Round {
 
         simulate_think!(2);
 
-        self.dealer_hand_mut()
-            .card_at_mut(1)
-            .reveal();
+        self.dealer_hand_mut().card_at_mut(1).reveal();
 
         self.update();
 
@@ -92,16 +82,16 @@ impl Round {
         loop {
             let dealer_hand = self.dealer_hand();
             match dealer_hand.state {
-                HandState::FINISHED => unreachable!(),
-                HandState::BUST => {
+                HandState::Finished => unreachable!(),
+                HandState::Bust => {
                     println!("Dealer --> BUST \n");
                     break;
                 }
-                HandState::BLACKJACK => {
+                HandState::Blackjack => {
                     println!("Dealer --> BLACKJACK! \n");
                     break;
                 }
-                HandState::UNDEFINED => match self.dealer_hand().sum {
+                HandState::Undefined => match self.dealer_hand().sum {
                     1..17 => {
                         println!("Dealer --> HIT \n");
                         let card = self.deck.draw_card();
@@ -111,7 +101,7 @@ impl Round {
                     }
                     17..21 => {
                         println!("Dealer --> STAY \n");
-                        self.dealer_hand_mut().state = HandState::FINISHED;
+                        self.dealer_hand_mut().state = HandState::Finished;
                         break;
                     }
                     _ => unreachable!(),
@@ -143,19 +133,15 @@ impl Round {
     fn print_current_game_state(&self) {
         for actor in self.actors.iter() {
             for hand in actor.hands.iter() {
-                println!(
-                    "{} hand: {}",
-                    actor.role.as_str(),
-                    hand.describe()
-                );
+                println!("{} hand: {}", actor.role.as_str(), hand.describe());
             }
         }
     }
 
     fn setup_dealer(&mut self) {
         let dealer = self.dealer_mut();
-        dealer.role = ActorRole::DEALER;
-        dealer.hand_at_mut(0).card_at_mut(1).unreveal();
+        dealer.role = ActorRole::Dealer;
+        dealer.hand_at_mut(0).card_at_mut(1).hide();
     }
 
     fn deal_initial_cards(&mut self) {
@@ -180,5 +166,9 @@ pub fn blackjack_round(number_of_user_players: usize, bet: i32) -> Round {
     let deck = Deck::new_shuffled();
     let actors = Vec::with_capacity(number_of_user_players + 1);
     let actor_bets = vec![bet; number_of_user_players];
-    Round { actors, actor_bets, deck }
+    Round {
+        actors,
+        actor_bets,
+        deck,
+    }
 }

@@ -1,112 +1,110 @@
 use std::clone::Clone;
 use std::prelude::v1::derive;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq)]
 pub enum CardSymbol {
-    ACE,
-    TWO,
-    THREE,
-    FOUR,
-    FIVE,
-    SIX,
-    SEVEN,
-    EIGHT,
-    NINE,
-    TEN,
-    JACK,
-    QUEEN,
-    KING,
-    JOKER,
+    Ace,
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Joker,
 }
 
 impl CardSymbol {
     pub(crate) fn from_value(value: i32) -> CardSymbol {
         match value {
-            1 => CardSymbol::ACE,
-            2 => CardSymbol::TWO,
-            3 => CardSymbol::THREE,
-            4 => CardSymbol::FOUR,
-            5 => CardSymbol::FIVE,
-            6 => CardSymbol::SIX,
-            7 => CardSymbol::SEVEN,
-            8 => CardSymbol::EIGHT,
-            9 => CardSymbol::NINE,
-            10 => CardSymbol::TEN,
-            11 => CardSymbol::JACK,
-            12 => CardSymbol::QUEEN,
-            13 => CardSymbol::KING,
-            14 => CardSymbol::JOKER,
+            1 => CardSymbol::Ace,
+            2 => CardSymbol::Two,
+            3 => CardSymbol::Three,
+            4 => CardSymbol::Four,
+            5 => CardSymbol::Five,
+            6 => CardSymbol::Six,
+            7 => CardSymbol::Seven,
+            8 => CardSymbol::Eight,
+            9 => CardSymbol::Nine,
+            10 => CardSymbol::Ten,
+            11 => CardSymbol::Jack,
+            12 => CardSymbol::Queen,
+            13 => CardSymbol::King,
+            14 => CardSymbol::Joker,
             _ => unreachable!("invalid card value {}!", value),
         }
     }
 
     pub fn to_str(&self) -> &'static str {
         match &self {
-            CardSymbol::ACE => "A",
-            CardSymbol::TWO => "2",
-            CardSymbol::THREE => "3",
-            CardSymbol::FOUR => "4",
-            CardSymbol::FIVE => "5",
-            CardSymbol::SIX => "6",
-            CardSymbol::SEVEN => "7",
-            CardSymbol::EIGHT => "8",
-            CardSymbol::NINE => "9",
-            CardSymbol::TEN => "10",
-            CardSymbol::JACK => "J",
-            CardSymbol::QUEEN => "Q",
-            CardSymbol::KING => "K",
-            CardSymbol::JOKER => "X",
+            CardSymbol::Ace => "A",
+            CardSymbol::Two => "2",
+            CardSymbol::Three => "3",
+            CardSymbol::Four => "4",
+            CardSymbol::Five => "5",
+            CardSymbol::Six => "6",
+            CardSymbol::Seven => "7",
+            CardSymbol::Eight => "8",
+            CardSymbol::Nine => "9",
+            CardSymbol::Ten => "10",
+            CardSymbol::Jack => "J",
+            CardSymbol::Queen => "Q",
+            CardSymbol::King => "K",
+            CardSymbol::Joker => "X",
         }
     }
 }
 
-#[derive(Clone, Copy)]
 pub enum Colors {
-    RED,
-    BLACK,
+    Red,
+    Black,
 }
 
 impl Colors {
     #[allow(dead_code)]
     pub fn to_str(&self) -> &'static str {
         match &self {
-            Colors::RED => "RED",
-            Colors::BLACK => "BLACK",
+            Colors::Red => "Red",
+            Colors::Black => "Black",
         }
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone)]
 pub enum Suit {
-    SPADE,
-    CLUB,
-    HEART,
-    DIAMOND,
+    Spade,
+    Club,
+    Heart,
+    Diamond,
 }
 
 impl Suit {
     #[allow(dead_code)]
     pub fn color(&self) -> Colors {
         match self {
-            Suit::SPADE => Colors::BLACK,
-            Suit::CLUB => Colors::BLACK,
-            Suit::HEART => Colors::RED,
-            Suit::DIAMOND => Colors::RED,
+            Suit::Spade => Colors::Black,
+            Suit::Club => Colors::Black,
+            Suit::Heart => Colors::Red,
+            Suit::Diamond => Colors::Red,
         }
     }
 
     #[allow(dead_code)]
-    pub fn to_str(&self) -> &'static str {
+    pub fn to_str(self) -> &'static str {
         match self {
-            Suit::SPADE => "S",
-            Suit::CLUB => "C",
-            Suit::HEART => "H",
-            Suit::DIAMOND => "D",
+            Suit::Spade => "S",
+            Suit::Club => "C",
+            Suit::Heart => "H",
+            Suit::Diamond => "D",
         }
     }
 }
 
-#[derive(Debug)]
 pub struct Card {
     pub suit: Suit,
     pub value: CardSymbol,
@@ -126,12 +124,11 @@ impl Card {
         self.revealed = true
     }
 
-    pub fn unreveal(&mut self) {
+    pub fn hide(&mut self) {
         self.revealed = false
     }
 
     pub fn is_revealed(&self) -> bool {
         self.revealed
     }
-
 }

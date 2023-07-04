@@ -3,23 +3,21 @@ use std::vec::Vec;
 use crate::at;
 use crate::gameplay::hand::Hand;
 
-
 #[derive(Debug)]
 pub enum ActorRole {
-    PLAYER,
-    DEALER,
+    Player,
+    Dealer,
 }
 
 impl ActorRole {
     pub fn as_str(&self) -> &'static str {
         match self {
-            ActorRole::PLAYER => "player",
-            ActorRole::DEALER => "dealer",
+            ActorRole::Player => "player",
+            ActorRole::Dealer => "dealer",
         }
     }
 }
 
-#[derive(Debug)]
 pub struct Actor {
     pub role: ActorRole,
     pub hands: Vec<Hand>,
@@ -35,10 +33,10 @@ impl Actor {
         at!(mut self.hands, at)
     }
 
-    pub fn new(actor_idx:usize, hand: Hand) -> Self {
+    pub fn new(actor_idx: usize, hand: Hand) -> Self {
         Self {
             actor_idx,
-            role: ActorRole::PLAYER,
+            role: ActorRole::Player,
             hands: vec![hand],
         }
     }

@@ -30,7 +30,7 @@ macro_rules! take_stdin_key {
 macro_rules! take_stdin_string {
     ($msg:expr, $take:literal) => {{
         println!("{}", $msg);
-        use std::string::{String};
+        use std::string::String;
         let mut s = String::new();
         std::io::stdin().read_line(&mut s).unwrap();
         s.as_str().trim().to_string()
@@ -40,14 +40,16 @@ macro_rules! take_stdin_string {
 #[macro_export]
 macro_rules! take_stdin {
     ($msg:expr, $t:ty, $take:literal) => {
-        crate::take_stdin_string!($msg,$take).parse::<$t>().unwrap()
+        $crate::take_stdin_string!($msg, $take)
+            .parse::<$t>()
+            .unwrap()
     };
 }
 
 #[macro_export]
 macro_rules! take_stdin_str {
     ($msg:expr, $take:literal) => {
-        crate::take_stdin_string!($msg).as_str()
+        $crate::take_stdin_string!($msg).as_str()
     };
 }
 

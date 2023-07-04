@@ -28,7 +28,7 @@ impl Deck {
 
     fn fresh_cards_vec() -> Vec<Card> {
         let mut cards: Vec<Card> = Vec::new();
-        let suits = [Suit::SPADE, Suit::HEART, Suit::CLUB, Suit::DIAMOND];
+        let suits = vec![Suit::Spade, Suit::Heart, Suit::Club, Suit::Diamond];
         for &suit in suits.iter() {
             for value in 1..14 {
                 // skipping joker for now

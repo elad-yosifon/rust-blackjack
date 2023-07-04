@@ -40,7 +40,7 @@ impl Game {
                         coins
                     }
                     HandResult::Win => {
-                        let coins = at!(round.actor_bets, actor_idx).clone();
+                        let coins = *at!(round.actor_bets, actor_idx);
                         println!(
                             "{} WON:  +{} coins",
                             at!(self.player_names, actor_idx),
@@ -76,28 +76,22 @@ enum HandResult {
 
 fn calculate_hand_result(user_hand: &Hand, dealer_hand: &Hand) -> HandResult {
     match (&user_hand.state, &dealer_hand.state) {
-        (HandState::FINISHED, HandState::FINISHED) => match user_hand.sum - dealer_hand.sum {
+        (HandState::Finished, HandState::Finished) => match user_hand.sum - dealer_hand.sum {
             ..0 => HandResult::Loss,
             0 => HandResult::Draw,
             1.. => HandResult::Win,
         },
-        (HandState::BLACKJACK, _) => {
-            return if user_hand.cards.len() == 2 {
+        (HandState::Blackjack, _) => {
+            if user_hand.cards.len() == 2 {
                 HandResult::AutoWin
+            } else if matches!(dealer_hand.state, HandState::Blackjack) {
+                HandResult::Draw
             } else {
-                if matches!(dealer_hand.state, HandState::BLACKJACK) {
-                    HandResult::Draw
-                } else {
-                    HandResult::Win
-                }
-            };
+                HandResult::Win
+            }
         }
-        (HandState::FINISHED, HandState::BUST) => {
-            return HandResult::Win;
-        }
-        (HandState::BUST, _) | (_, HandState::BLACKJACK) => {
-            return HandResult::Loss;
-        }
-        (HandState::UNDEFINED, _) | (_, HandState::UNDEFINED) => unreachable!(),
+        (HandState::Finished, HandState::Bust) => HandResult::Win,
+        (HandState::Bust, _) | (_, HandState::Blackjack) => HandResult::Loss,
+        (HandState::Undefined, _) | (_, HandState::Undefined) => unreachable!(),
     }
 }

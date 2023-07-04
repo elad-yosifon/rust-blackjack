@@ -20,11 +20,11 @@ fn main() {
         _ => 0,
     };
 
-    if 1 > number_of_players || number_of_players > 4 {
+    if !(1..=3).contains(&number_of_players) {
         println!("Game can start with 1-3 players");
         exit(-1);
     } else {
-        println!("{}",number_of_players);
+        println!("{}", number_of_players);
     }
 
     let player_scores = vec![minimum_bet * 10; number_of_players];
@@ -52,7 +52,7 @@ fn main() {
 
         loop {
             println!();
-            match take_stdin_key!("Another round? [y/n]:", 'y','n') {
+            match take_stdin_key!("Another round? [y/n]:", 'y', 'n') {
                 'y' => {
                     game.current_round = blackjack_round(number_of_players, minimum_bet);
                     break;

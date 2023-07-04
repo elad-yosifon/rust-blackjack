@@ -1,5 +1,5 @@
-pub mod game;
-pub mod round;
-pub mod hand;
-mod blackjack;
 mod actor;
+mod blackjack;
+pub mod game;
+pub mod hand;
+pub mod round;

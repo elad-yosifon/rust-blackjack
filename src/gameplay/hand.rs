@@ -4,30 +4,28 @@ use crate::cards::card::{Card, CardSymbol};
 use crate::gameplay::blackjack::{blackjack_card_value, UserAction};
 use crate::{at, take_stdin_key};
 
-#[derive(Debug)]
 pub enum HandState {
-    UNDEFINED,
-    FINISHED,
-    BUST,
-    BLACKJACK,
+    Undefined,
+    Finished,
+    Bust,
+    Blackjack,
 }
 
 impl HandState {
     pub fn from_value(value: i32) -> HandState {
         if value > 21 {
-            return HandState::BUST;
+            return HandState::Bust;
         }
         if value == 21 {
-            return HandState::BLACKJACK;
+            return HandState::Blackjack;
         }
         if value < 21 {
-            return HandState::UNDEFINED;
+            return HandState::Undefined;
         }
         unreachable!()
     }
 }
 
-#[derive(Debug)]
 pub struct Hand {
     pub state: HandState,
     pub sum: i32,
@@ -46,7 +44,7 @@ impl Hand {
         Hand {
             cards: VecDeque::new(),
             sum: 0,
-            state: HandState::UNDEFINED,
+            state: HandState::Undefined,
         }
     }
 
@@ -54,7 +52,7 @@ impl Hand {
         Hand {
             cards: VecDeque::from(cards),
             sum: 0,
-            state: HandState::UNDEFINED,
+            state: HandState::Undefined,
         }
     }
 
@@ -62,10 +60,9 @@ impl Hand {
         let mut strings = Vec::new();
         let mut fully_revealed = true;
         for card in self.cards.iter() {
-            let symbol = &card.value;
-            assert_ne!(matches!(symbol, CardSymbol::JOKER), true);
+            assert!(card.value != CardSymbol::Joker);
             if card.is_revealed() {
-                strings.push(symbol.to_str().to_string());
+                strings.push(card.value.to_str().to_string());
             } else {
                 fully_revealed = false;
                 strings.push("X".to_string());
@@ -97,18 +94,16 @@ impl Hand {
     pub fn split(&mut self, card_0_1: Card, card_1_1: Card) -> Hand {
         let card_1_0 = self.cards.pop_back().unwrap();
         self.cards.push_back(card_0_1);
-        let new_hand = Hand::from_cards(vec![card_1_0, card_1_1]);
-        new_hand
+        Hand::from_cards(vec![card_1_0, card_1_1])
     }
 
     pub(crate) fn update_state(&mut self) {
         let mut sum = 0;
         let mut number_of_aces = 0;
         for card in self.cards.iter() {
-            let value = &card.value;
-            assert_ne!(matches!(value, CardSymbol::JOKER), true);
-            sum += blackjack_card_value(&value);
-            if matches!(value, CardSymbol::ACE) {
+            assert!(card.value != CardSymbol::Joker);
+            sum += blackjack_card_value(&card.value);
+            if card.value == CardSymbol::Ace {
                 number_of_aces += 1;
             }
         }
@@ -123,7 +118,7 @@ impl Hand {
 
         self.sum = sum;
 
-        if matches!(self.state, HandState::UNDEFINED) {
+        if matches!(self.state, HandState::Undefined) {
             self.state = HandState::from_value(sum);
         }
     }
@@ -131,15 +126,15 @@ impl Hand {
     pub(crate) fn prompt_user_action(&self) -> UserAction {
         loop {
             if self.splitable() {
-                match take_stdin_key!("STAY or HIT or SPLIT? [s/h/x]:", 's','h','x') {
+                match take_stdin_key!("STAY or HIT or SPLIT? [s/h/x]:", 's', 'h', 'x') {
                     'h' => {
-                        return UserAction::HIT;
+                        return UserAction::Hit;
                     }
                     's' => {
-                        return UserAction::STAY;
+                        return UserAction::Stay;
                     }
-                    'x'  => {
-                        return UserAction::SPLIT;
+                    'x' => {
+                        return UserAction::Split;
                     }
                     _ => {
                         println!("Invalid command.");
@@ -147,12 +142,12 @@ impl Hand {
                     }
                 }
             } else {
-                match take_stdin_key!("STAY or HIT? [s/h]:", 's','h'){
+                match take_stdin_key!("STAY or HIT? [s/h]:", 's', 'h') {
                     'h' => {
-                        return UserAction::HIT;
+                        return UserAction::Hit;
                     }
                     's' => {
-                        return UserAction::STAY;
+                        return UserAction::Stay;
                     }
                     _ => {
                         println!("Invalid command.");
