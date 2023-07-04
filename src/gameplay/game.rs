@@ -19,16 +19,17 @@ impl Game {
     }
 }
 
-fn print_hand_result(result:&HandResult, player_name:&String, coins: &i32){
+fn print_hand_result(result: &HandResult, player_name: &String, coins: &i32) {
     match result {
         HandResult::AutoWin => println!("{} : +{:2} coins --> AUTO BLACKJACK!", player_name, coins),
-        HandResult::Win     => println!("{} : +{:2} coins --> WON"                , player_name, coins),
-        HandResult::Draw    => println!("{} : +{:2} coins --> DRAW"               , player_name, coins),
-        HandResult::Loss    => println!("{} : -{:2} coins --> LOSS"               , player_name, -coins),
+        HandResult::Win => println!("{} : +{:2} coins --> WON", player_name, coins),
+        HandResult::Draw => println!("{} : +{:2} coins --> DRAW", player_name, coins),
+        HandResult::Loss => println!("{} : -{:2} coins --> LOSS", player_name, -coins),
     }
 }
+
 impl Game {
-    pub fn judge_round(&mut self, round:&Round) {
+    pub fn judge_round(&mut self, round: &Round) {
         let i = round.actors.len();
         for actor_idx in 0..(i - 1) {
             let actor = at!(round.actors, actor_idx);
@@ -40,11 +41,7 @@ impl Game {
                     HandResult::Loss => -at!(round.actor_bets, actor_idx),
                     HandResult::Draw => 0,
                 };
-                print_hand_result(
-                    &hand_result,
-                    at!(self.player_names, actor_idx),
-                    &coins
-                );
+                print_hand_result(&hand_result, at!(self.player_names, actor_idx), &coins);
 
                 let score = at!(mut self.player_scores, actor_idx);
                 *score += coins

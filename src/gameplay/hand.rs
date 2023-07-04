@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
 
+use crate::{at, take_stdin_key};
 use crate::cards::card::{Card, CardSymbol};
 use crate::gameplay::blackjack::{blackjack_card_value, UserAction};
-use crate::{at, take_stdin_key};
 
 pub enum HandState {
     Undefined,

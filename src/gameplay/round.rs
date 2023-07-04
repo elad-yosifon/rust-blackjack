@@ -1,8 +1,8 @@
+use crate::{at, simulate_think};
 use crate::cards::deck::Deck;
 use crate::gameplay::actor::{Actor, ActorRole};
 use crate::gameplay::blackjack::UserAction;
 use crate::gameplay::hand::{Hand, HandState};
-use crate::{at, simulate_think};
 
 pub struct Round {
     pub deck: Deck,
@@ -136,7 +136,7 @@ impl Round {
     fn print_current_game_state(&self) {
         for actor in self.actors.iter() {
             for (idx, hand) in actor.hands.iter().enumerate() {
-                println!("{}:{} {{ {} }}", actor.name, idx+1, hand.describe());
+                println!("{}:{} {{ {} }}", actor.name, idx + 1, hand.describe());
             }
         }
     }
