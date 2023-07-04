@@ -123,10 +123,19 @@ impl Hand {
         }
     }
 
-    pub(crate) fn prompt_user_action(&self) -> UserAction {
+    pub(crate) fn prompt_user_action(
+        &self,
+        actor_name: &String,
+        hand_idx: usize,
+    ) -> UserAction {
         loop {
             if self.splitable() {
-                match take_stdin_key!("STAY or HIT or SPLIT? [s/h/x]:", 's', 'h', 'x') {
+                let prompt = format!(
+                    "{}:{} STAY/HIT/SPLIT? [s/h/x]:",
+                    actor_name,
+                    hand_idx + 1
+                );
+                match take_stdin_key!(prompt, 's', 'h', 'x') {
                     'h' => {
                         return UserAction::Hit;
                     }
@@ -142,7 +151,12 @@ impl Hand {
                     }
                 }
             } else {
-                match take_stdin_key!("STAY or HIT? [s/h]:", 's', 'h') {
+                let prompt = format!(
+                    "{}:{} STAY/HIT? [s/h]:",
+                    actor_name,
+                    hand_idx + 1
+                );
+                match take_stdin_key!(prompt, 's', 'h') {
                     'h' => {
                         return UserAction::Hit;
                     }

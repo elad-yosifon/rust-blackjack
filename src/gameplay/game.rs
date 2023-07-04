@@ -4,7 +4,6 @@ use crate::gameplay::round::Round;
 
 #[allow(dead_code)]
 pub struct Game {
-    pub current_round: Round,
     pub player_scores: Vec<i32>,
     pub player_names: Vec<String>,
 }
@@ -20,48 +19,35 @@ impl Game {
     }
 }
 
+fn print_hand_result(result:&HandResult, player_name:&String, coins: &i32){
+    match result {
+        HandResult::AutoWin => println!("{} : +{:2} coins --> AUTO BLACKJACK!", player_name, coins),
+        HandResult::Win     => println!("{} : +{:2} coins --> WON"                , player_name, coins),
+        HandResult::Draw    => println!("{} : +{:2} coins --> DRAW"               , player_name, coins),
+        HandResult::Loss    => println!("{} : -{:2} coins --> LOSS"               , player_name, -coins),
+    }
+}
 impl Game {
-    pub fn judge_current_round(&mut self) {
-        let i = &self.current_round.actors.len();
+    pub fn judge_round(&mut self, round:&Round) {
+        let i = round.actors.len();
         for actor_idx in 0..(i - 1) {
-            let actor = at!(&self.current_round.actors, actor_idx);
+            let actor = at!(round.actors, actor_idx);
             for hand in &actor.hands {
-                let act = calculate_hand_result(hand, self.current_round.dealer_hand());
+                let hand_result = calculate_hand_result(hand, round.dealer_hand());
+                let coins = match hand_result {
+                    HandResult::AutoWin => (3 * at!(round.actor_bets, actor_idx)) / 2,
+                    HandResult::Win => *at!(round.actor_bets, actor_idx),
+                    HandResult::Loss => -at!(round.actor_bets, actor_idx),
+                    HandResult::Draw => 0,
+                };
+                print_hand_result(
+                    &hand_result,
+                    at!(self.player_names, actor_idx),
+                    &coins
+                );
+
                 let score = at!(mut self.player_scores, actor_idx);
-                let round = &self.current_round;
-                *score += match act {
-                    HandResult::AutoWin => {
-                        let coins = (3 * at!(round.actor_bets, actor_idx)) / 2;
-                        println!(
-                            "{} got immediate BLACKJACK:  +{} coins",
-                            at!(self.player_names, actor_idx),
-                            coins
-                        );
-                        coins
-                    }
-                    HandResult::Win => {
-                        let coins = *at!(round.actor_bets, actor_idx);
-                        println!(
-                            "{} WON:  +{} coins",
-                            at!(self.player_names, actor_idx),
-                            coins
-                        );
-                        coins
-                    }
-                    HandResult::Loss => {
-                        let coins = at!(round.actor_bets, actor_idx);
-                        println!(
-                            "{} LOST:  -{} coins",
-                            at!(self.player_names, actor_idx),
-                            coins
-                        );
-                        -coins
-                    }
-                    HandResult::Draw => {
-                        println!("{} DRAW:  +{} coins", at!(self.player_names, actor_idx), 0);
-                        0
-                    }
-                }
+                *score += coins
             }
         }
     }

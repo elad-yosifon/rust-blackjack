@@ -26,7 +26,7 @@ fn main() {
     } else {
         println!("{}", number_of_players);
     }
-
+    // let number_of_players = 3;
     let player_scores = vec![minimum_bet * 10; number_of_players];
 
     let player_names = vec![""; number_of_players]
@@ -35,17 +35,18 @@ fn main() {
         .map(|(idx, _)| format!("User_{}", idx + 1))
         .collect();
 
+
     let mut game = Game {
-        current_round: blackjack_round(number_of_players, minimum_bet),
         player_scores,
         player_names,
     };
 
     loop {
-        game.current_round.play();
+        let mut round = blackjack_round(number_of_players, minimum_bet);
+        round.play();
 
         simulate_think!(1);
-        game.judge_current_round();
+        game.judge_round(&round);
 
         simulate_think!(2);
         game.print_player_scores();
@@ -54,7 +55,6 @@ fn main() {
             println!();
             match take_stdin_key!("Another round? [y/n]:", 'y', 'n') {
                 'y' => {
-                    game.current_round = blackjack_round(number_of_players, minimum_bet);
                     break;
                 }
                 'n' => {
@@ -62,8 +62,7 @@ fn main() {
                     exit(0);
                 }
                 _ => {
-                    println!("Invalid command.");
-                    continue;
+                    unreachable!()
                 }
             }
         }
