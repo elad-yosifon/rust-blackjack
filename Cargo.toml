@@ -2,10 +2,12 @@
 name = "rust-blackjack"
 version = "0.1.0"
 authors = ["Elad Yosifon"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 rand = "0.8.4"
 termion = "1.5.6"
+ggez = { version = "0.9.3" }
+maplit2 = "1.0.5"
