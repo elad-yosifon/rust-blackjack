@@ -3,7 +3,8 @@ use ggez::event::MouseButton;
 use ggez::graphics::{Canvas, Color, DrawParam, Drawable, PxScale, Text, TextFragment, TextLayout};
 use ggez::mint::Point2;
 use ggez::Context;
-
+use ggez::input::mouse;
+use ggez::input::mouse::CursorIcon;
 use crate::gfx::scenes::Scene;
 use crate::gfx::DrawableElementState::{Clicked, Hidden, Hovered, Visible};
 use crate::gfx::{DrawableElementState, PositionedText};
@@ -57,13 +58,14 @@ fn new_positioned_text(
 
 impl Scene for NumberOfPlayersScene {
     fn update(&mut self, game: &mut MyGame, ctx: &mut Context) {
-        let gfx = &ctx.gfx;
+
+        mouse::set_cursor_type(ctx,CursorIcon::Default);
 
         let mouse_pos = ctx.mouse.position();
 
         if ctx.mouse.button_pressed(MouseButton::Left) {
             for (element, dp, s, clickable) in &self.elements {
-                if let Some(r) = element.dimensions(gfx) {
+                if let Some(r) = element.dimensions(&ctx.gfx) {
                     if r.contains(mouse_pos) {
                         //TODO: update state
                     }
@@ -75,9 +77,10 @@ impl Scene for NumberOfPlayersScene {
             if clickable.not() {
                 continue;
             }
-            if let Some(r) = element.dimensions(gfx) {
+            if let Some(r) = element.dimensions(&ctx.gfx) {
                 if r.contains(mouse_pos) {
                     *element_state = Hovered;
+                    mouse::set_cursor_type(ctx,CursorIcon::Hand);
                     (*dp).color = Color::YELLOW;
                 } else {
                     *element_state = Visible;
