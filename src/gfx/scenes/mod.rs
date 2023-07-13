@@ -3,17 +3,19 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use ggez::graphics::Canvas;
 use ggez::Context;
+use ggez::graphics::Canvas;
 
+use crate::GameContext;
+use crate::gfx::scenes::deal_cards::DealCardsScene;
 use crate::gfx::scenes::number_of_players::NumberOfPlayersScene;
-use crate::MyGame;
 
 pub mod number_of_players;
+mod deal_cards;
 
 pub trait Scene {
-    fn update(&mut self, game: &mut MyGame, ctx: &mut Context);
-    fn draw(&self, canvas: &mut Canvas);
+    fn update(&mut self, game_ctx: &mut GameContext, ctx: &mut Context);
+    fn draw(&self, ctx: &mut Context, canvas: &mut Canvas);
 }
 
 pub struct Scenes {
@@ -37,12 +39,17 @@ impl Scenes {
         }
     }
 
-    pub fn from_game(game: &MyGame) -> Self {
+    pub fn from_game(game_ctx: &GameContext) -> Self {
         let mut map: HashMap<SceneType, Rc<RefCell<dyn Scene>>> = HashMap::new();
 
         map.insert(
             SceneType::ChooseNumberOfPlayers,
-            Rc::new(RefCell::new(NumberOfPlayersScene::new(game))),
+            Rc::new(RefCell::new(NumberOfPlayersScene::new(game_ctx))),
+        );
+
+        map.insert(
+            SceneType::DealCards,
+            Rc::new(RefCell::new(DealCardsScene::new(game_ctx))),
         );
 
         Self { map }

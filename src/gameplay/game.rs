@@ -6,6 +6,17 @@ use crate::gameplay::round::Round;
 pub struct Game {
     pub player_scores: Vec<i32>,
     pub player_names: Vec<String>,
+    pub number_of_players: usize,
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Self {
+            number_of_players: 0,
+            player_names: vec![],
+            player_scores: vec![]
+        }
+    }
 }
 
 impl Game {
