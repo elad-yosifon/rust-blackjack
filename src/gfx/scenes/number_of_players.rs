@@ -20,7 +20,7 @@ pub struct NumberOfPlayersScene {
 
 impl NumberOfPlayersScene {
     pub fn new(game_ctx: &GameContext) -> Self {
-        let (h, w) = game_ctx.window_size;
+        let (_, w) = game_ctx.window_size;
 
         let mut txt = Text::new(TextFragment::new("Please choose number of players:"));
         txt.set_scale(PxScale::from(40.0));
@@ -59,7 +59,7 @@ impl Scene for NumberOfPlayersScene {
                     if let Some(r) = element.dimensions(&ctx.gfx) {
                         if r.contains(mouse_pos) {
                             let number_of_players = self.number_of_players.get(i).unwrap();
-                            game_ctx.start_game(number_of_players.clone());
+                            game_ctx.start_game(*number_of_players);
                             game_ctx.current_scene = SceneType::DealCards;
                             // not returning on purpose
                         }

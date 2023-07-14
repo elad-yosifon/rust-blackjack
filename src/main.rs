@@ -1,21 +1,18 @@
 #![feature(exclusive_range_pattern)]
 
-use std::{path, vec};
 use std::cell::RefCell;
-use std::ops::Deref;
 use std::process::exit;
 use std::rc::Rc;
+use std::{path, vec};
 
-use ggez::{Context, ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self, EventHandler};
 use ggez::glam::Vec2;
 use ggez::graphics::{self, BlendMode, Color, DrawParam, Image};
-
-use gameplay::round::blackjack_round;
+use ggez::{Context, ContextBuilder, GameResult};
 
 use crate::gameplay::game::Game;
-use crate::gfx::scenes::{Scene, Scenes, SceneType};
+use crate::gfx::scenes::{Scene, SceneType, Scenes};
 
 mod cards;
 mod gameplay;
@@ -117,7 +114,11 @@ impl GameContext {
             board,
             scences: Scenes::default(),
             current_scene: SceneType::ChooseNumberOfPlayers,
-            game: Game::default(),
+            game: Game {
+                number_of_players: 0,
+                player_scores: vec![],
+                player_names: vec![],
+            },
         }
     }
 

@@ -26,10 +26,12 @@ impl DrawableElementState {
         Self::new(DrawableElementState::HOVERED | DrawableElementState::PRESSED)
     }
 
+    #[allow(unused)]
     fn passive_toggle() -> DrawableElementState {
         Self::new(DrawableElementState::TOGGLED)
     }
 
+    #[allow(unused)]
     fn active_toggle() -> DrawableElementState {
         Self::new(
             DrawableElementState::HOVERED
@@ -48,6 +50,7 @@ impl DrawableElementState {
     }
 }
 
+#[allow(unused)]
 pub enum DrawableElementType {
     Text,
     Image,
@@ -125,20 +128,24 @@ impl DrawableElement {
         }
     }
 
+    #[allow(unused)]
     pub fn hidden(mut self) -> Self {
         self.element_visibility = DrawableElementVisibility::Hidden;
         self
     }
 
+    #[allow(unused)]
     pub fn hide(&mut self) {
         self.element_visibility = DrawableElementVisibility::Hidden;
     }
 
+    #[allow(unused)]
     pub fn visible(mut self) -> Self {
         self.element_visibility = DrawableElementVisibility::Visible;
         self
     }
 
+    #[allow(unused)]
     pub fn show(&mut self) {
         self.element_visibility = DrawableElementVisibility::Visible;
     }

@@ -19,7 +19,7 @@ pub struct DealCardsScene {
 
 impl DealCardsScene {
     pub fn new(game_ctx: &GameContext) -> Self {
-        let (h, w) = game_ctx.window_size;
+        let (_, w) = game_ctx.window_size;
 
         let mut txt = Text::new(TextFragment::new("Number of players:"));
         txt.set_scale(PxScale::from(40.0));

@@ -1,20 +1,22 @@
 use std::iter::Filter;
 use std::slice::Iter;
 
-use ggez::Context;
 use ggez::input::mouse;
 use ggez::input::mouse::CursorIcon;
+use ggez::Context;
 
+use crate::gfx::elements::drawable_element::{
+    DrawableElement, DrawableElementState, DrawableElementVisibility,
+};
 use crate::GameContext;
-use crate::gfx::elements::drawable_element::{DrawableElement, DrawableElementState, DrawableElementVisibility};
 
 pub(crate) fn handle_hovers(
-    game_ctx: &mut GameContext,
+    _game_ctx: &mut GameContext,
     ctx: &mut Context,
-    elements: &mut Vec<DrawableElement>,
+    elements: &mut [DrawableElement],
 ) {
     let mouse_pos = ctx.mouse.position();
-    for (i, element) in elements.iter_mut().enumerate() {
+    for element in elements.iter_mut() {
         let possible_states = &element.possible_states;
         if possible_states.has(DrawableElementState::PRESSED)
             || possible_states.has(DrawableElementState::HOVERED)
@@ -32,7 +34,10 @@ pub(crate) fn handle_hovers(
     }
 }
 
-
-pub(crate) fn iter_visible<'a>(elements: &'a Vec<DrawableElement>) -> Filter<Iter<'a, DrawableElement>, fn(&&'a DrawableElement) -> bool> {
-    Iter::filter(elements.iter(), |de| matches!(de.element_visibility, DrawableElementVisibility::Visible))
+pub(crate) fn iter_visible(
+    elements: &[DrawableElement],
+) -> Filter<Iter<DrawableElement>, fn(&&DrawableElement) -> bool> {
+    Iter::filter(elements.iter(), |de| {
+        matches!(de.element_visibility, DrawableElementVisibility::Visible)
+    })
 }

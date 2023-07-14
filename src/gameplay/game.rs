@@ -9,16 +9,6 @@ pub struct Game {
     pub number_of_players: usize,
 }
 
-impl Default for Game {
-    fn default() -> Self {
-        Self {
-            number_of_players: 0,
-            player_names: vec![],
-            player_scores: vec![]
-        }
-    }
-}
-
 impl Game {
     pub fn print_player_scores(&self) {
         println!();

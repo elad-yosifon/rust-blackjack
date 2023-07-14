@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ops::Deref;
+
 use std::rc::Rc;
 
 use ggez::Context;
@@ -23,6 +23,7 @@ pub struct Scenes {
 }
 
 #[derive(Hash, Eq, PartialEq)]
+#[allow(unused)]
 pub enum SceneType {
     ChooseNumberOfPlayers,
     DealCards,
