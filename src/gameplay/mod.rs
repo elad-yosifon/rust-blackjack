@@ -1,4 +1,4 @@
-mod actor;
+pub mod actor;
 mod blackjack;
 pub mod game;
 pub mod hand;

@@ -33,11 +33,9 @@ pub struct Hand {
 }
 
 impl Hand {
-    fn splitable(&self) -> bool {
-        if self.cards.len() == 2 && self.card_at(0).value == self.card_at(1).value {
-            return true;
-        }
-        false
+    
+    pub fn is_splitable(&self) -> bool {
+        self.cards.len() == 2 && self.card_at(0).value == self.card_at(1).value
     }
 
     pub fn new() -> Self {
@@ -129,7 +127,7 @@ impl Hand {
         hand_idx: usize,
     ) -> UserAction {
         loop {
-            if self.splitable() {
+            if self.is_splitable() {
                 let prompt = format!(
                     "{}:{} STAY/HIT/SPLIT? [s/h/x]:",
                     actor_name,

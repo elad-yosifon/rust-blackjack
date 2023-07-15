@@ -9,8 +9,17 @@ pub struct Deck {
     pub cards: VecDeque<Card>,
 }
 
+#[allow(clippy::derivable_impls)]
+impl Default for Deck {
+    fn default() -> Self {
+        Self {
+            cards: VecDeque::new()
+        }
+    }
+}
+
 impl Deck {
-    #[allow(dead_code)]
+
     pub fn new() -> Self {
         Self {
             cards: VecDeque::from(Self::fresh_cards_vec()),

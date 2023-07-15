@@ -49,63 +49,6 @@ pub struct GameContext {
 }
 
 impl GameContext {
-    fn main_() {
-        // let minimum_bet = 10;
-        // let number_of_players = match take_stdin_key!("Number of players? [1/2/3]", '1', '2', '3') {
-        //     '1' => 1,
-        //     '2' => 2,
-        //     '3' => 3,
-        //     _ => 0,
-        // };
-        //
-        // if !(1..=3).contains(&number_of_players) {
-        //     println!("Game can start with 1-3 players");
-        //     exit(-1);
-        // } else {
-        //     println!("{}", number_of_players);
-        // }
-        // // let number_of_players = 3;
-        // let player_scores = vec![minimum_bet * 10; number_of_players];
-        //
-        // let player_names = vec![""; number_of_players]
-        //     .iter()
-        //     .enumerate()
-        //     .map(|(idx, _)| format!("User_{}", idx + 1))
-        //     .collect();
-        //
-        // let mut game = Game {
-        //     number_of_players,
-        //     player_scores,
-        //     player_names,
-        // };
-        //
-        // loop {
-        //     let mut round = blackjack_round(number_of_players, minimum_bet);
-        //     round.play();
-        //
-        //     simulate_think!(1);
-        //     game.judge_round(&round);
-        //
-        //     simulate_think!(2);
-        //     game.print_player_scores();
-        //
-        //     loop {
-        //         println!();
-        //         match take_stdin_key!("Another round? [y/n]:", 'y', 'n') {
-        //             'y' => {
-        //                 break;
-        //             }
-        //             'n' => {
-        //                 println!("Thanks for playing, bye :)");
-        //                 exit(0);
-        //             }
-        //             _ => {
-        //                 unreachable!()
-        //             }
-        //         }
-        //     }
-        // }
-    }
 
     pub fn new(_ctx: &mut Context) -> GameContext {
         let board = Image::from_path(_ctx, "/board.jpg").unwrap();
@@ -114,11 +57,7 @@ impl GameContext {
             board,
             scences: Scenes::default(),
             current_scene: SceneType::ChooseNumberOfPlayers,
-            game: Game {
-                number_of_players: 0,
-                player_scores: vec![],
-                player_names: vec![],
-            },
+            game: Game::default(),
         }
     }
 
@@ -128,38 +67,16 @@ impl GameContext {
     }
 
     pub fn start_game(&mut self, number_of_players: usize) {
-        let minimum_bet = 10;
-
-        if !(1..=3).contains(&number_of_players) {
-            println!("Game can start with 1-3 players");
-            exit(-1);
-        } else {
-            println!("Number of player: {}", number_of_players);
-        }
-
-        let player_scores = vec![minimum_bet * 10; number_of_players];
-
-        let player_names = vec![""; number_of_players]
-            .iter()
-            .enumerate()
-            .map(|(idx, _)| format!("User_{}", idx + 1))
-            .collect();
-
-        self.game = Game {
-            number_of_players,
-            player_scores,
-            player_names,
-        };
+        self.game = Game::init(number_of_players);
     }
 
     fn get_scene(&mut self) -> Rc<RefCell<dyn Scene>> {
         match self.current_scene {
             SceneType::ChooseNumberOfPlayers => self.scences.get(SceneType::ChooseNumberOfPlayers),
-            SceneType::DealCards => self.scences.get(SceneType::DealCards),
-            SceneType::PlayerTurn => unimplemented!(),
-            SceneType::DealerTurn => unimplemented!(),
+            SceneType::PlayRound => self.scences.get(SceneType::PlayRound),
             SceneType::RoundSummary => unimplemented!(),
-            SceneType::ChooseEndOfRoundAction => unimplemented!(),
+            SceneType::EndOfRound => self.scences.get(SceneType::EndOfRound),
+            SceneType::EndOfGame => self.scences.get(SceneType::EndOfGame),
         }
     }
 }

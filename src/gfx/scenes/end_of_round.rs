@@ -8,58 +8,56 @@ use ggez::mint::Point2;
 use ggez::Context;
 
 use crate::gfx::elements::drawable_element::DrawableElement;
-use crate::gfx::elements::utils::handle_hover_gfx;
 use crate::gfx::scenes::{Scene, SceneType};
 use crate::GameContext;
+use crate::gfx::elements::utils::handle_hover_gfx;
 
-pub struct NumberOfPlayersScene {
+pub struct EndOfRoundScene {
     elements: Vec<DrawableElement>,
-    number_of_players: Vec<usize>,
+    values: Vec<bool>,
 }
 
-impl NumberOfPlayersScene {
+impl EndOfRoundScene {
     pub fn new(game_ctx: &GameContext) -> Self {
         let (_, w) = game_ctx.window_size;
 
-        let mut txt = Text::new(TextFragment::new("Please choose number of players:"));
+        let mut txt = Text::new(TextFragment::new("Should we play another round?"));
         txt.set_scale(PxScale::from(40.0));
 
-        let mut b1 = Text::new(TextFragment::new("1"));
-        b1.set_scale(PxScale::from(60.0));
+        let mut y = Text::new(TextFragment::new("YES"));
+        y.set_scale(PxScale::from(60.0));
 
-        let mut b2 = Text::new(TextFragment::new("2"));
-        b2.set_scale(PxScale::from(60.0));
-
-        let mut b3 = Text::new(TextFragment::new("3"));
-        b3.set_scale(PxScale::from(60.0));
+        let mut n = Text::new(TextFragment::new("NO"));
+        n.set_scale(PxScale::from(60.0));
 
         Self {
             elements: vec![
                 DrawableElement::new_text(txt, Point2::from([w / 2.0, 300.])),
-                DrawableElement::new_text_button(b1, Point2::from([200., 500.])),
-                DrawableElement::new_text_button(b2, Point2::from([400., 500.])),
-                DrawableElement::new_text_button(b3, Point2::from([600., 500.])),
+                DrawableElement::new_text_button(y, Point2::from([200., 500.])),
+                DrawableElement::new_text_button(n, Point2::from([400., 500.])),
             ],
-            number_of_players: vec![0, 1, 2, 3],
+            values: vec![false, true, false],
         }
     }
 }
 
-impl Scene for NumberOfPlayersScene {
+impl Scene for EndOfRoundScene {
     fn update(&mut self, game_ctx: &mut GameContext, ctx: &mut Context) {
         mouse::set_cursor_type(ctx, CursorIcon::Default);
 
         for (i, element) in self.elements.iter().enumerate() {
-            if element.check_clicked(&ctx) {
-                let number_of_players = self.number_of_players[i];
-                game_ctx.start_game(number_of_players);
-                game_ctx.game.start_new_round();
-                game_ctx.current_scene = SceneType::PlayRound;
+            if element.check_clicked(ctx) {
+                if self.values[i] {
+                    game_ctx.current_scene = SceneType::PlayRound;
+                } else {
+                    game_ctx.current_scene = SceneType::EndOfGame;
+                }
                 break;
             }
         }
 
-        self.elements.iter_mut().for_each(|element| {
+        let elements = &mut self.elements;
+        elements.iter_mut().for_each(|element| {
             handle_hover_gfx(ctx, element);
         })
     }

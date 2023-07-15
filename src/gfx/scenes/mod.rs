@@ -7,11 +7,15 @@ use ggez::Context;
 use ggez::graphics::Canvas;
 
 use crate::GameContext;
-use crate::gfx::scenes::deal_cards::DealCardsScene;
+use crate::gfx::scenes::play_round::PlayRoundScene;
+use crate::gfx::scenes::end_of_game::EndOfGameScene;
+use crate::gfx::scenes::end_of_round::EndOfRoundScene;
 use crate::gfx::scenes::number_of_players::NumberOfPlayersScene;
 
 pub mod number_of_players;
-mod deal_cards;
+mod play_round;
+mod end_of_round;
+mod end_of_game;
 
 pub trait Scene {
     fn update(&mut self, game_ctx: &mut GameContext, ctx: &mut Context);
@@ -26,11 +30,10 @@ pub struct Scenes {
 #[allow(unused)]
 pub enum SceneType {
     ChooseNumberOfPlayers,
-    DealCards,
-    PlayerTurn,
-    DealerTurn,
+    PlayRound,
     RoundSummary,
-    ChooseEndOfRoundAction,
+    EndOfRound,
+    EndOfGame,
 }
 
 impl Scenes {
@@ -49,8 +52,18 @@ impl Scenes {
         );
 
         map.insert(
-            SceneType::DealCards,
-            Rc::new(RefCell::new(DealCardsScene::new(game_ctx))),
+            SceneType::PlayRound,
+            Rc::new(RefCell::new(PlayRoundScene::new(game_ctx))),
+        );
+
+        map.insert(
+            SceneType::EndOfRound,
+            Rc::new(RefCell::new(EndOfRoundScene::new(game_ctx))),
+        );
+
+        map.insert(
+            SceneType::EndOfGame,
+            Rc::new(RefCell::new(EndOfGameScene::new(game_ctx))),
         );
 
         Self { map }

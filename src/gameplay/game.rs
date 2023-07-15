@@ -1,15 +1,58 @@
 use crate::at;
+use crate::cards::deck::Deck;
 use crate::gameplay::hand::{Hand, HandState};
-use crate::gameplay::round::Round;
+use crate::gameplay::round::{blackjack_round, Round};
 
-#[allow(dead_code)]
 pub struct Game {
     pub player_scores: Vec<i32>,
     pub player_names: Vec<String>,
     pub number_of_players: usize,
+    pub current_round: Round,
+    pub initial_bet: i32,
+}
+
+impl Default for Game {
+
+    fn default() -> Self {
+        Self {
+            initial_bet: 0,
+            number_of_players: 0,
+            player_scores: vec![],
+            player_names: vec![],
+            current_round: Round::default(),
+        }
+    }
+
 }
 
 impl Game {
+
+    pub fn init(number_of_players:usize) -> Self {
+
+        let initial_bet = 10;
+
+        let player_scores = vec![initial_bet * 10; number_of_players];
+
+        let player_names = vec![""; number_of_players]
+            .iter()
+            .enumerate()
+            .map(|(idx, _)| format!("User_{}", idx + 1))
+            .collect();
+
+        Self {
+            initial_bet,
+            player_scores,
+            player_names,
+            number_of_players,
+            current_round: Round::default(),
+        }
+    }
+
+    pub fn start_new_round(&mut self) {
+        self.current_round = blackjack_round(self.number_of_players, self.initial_bet);
+        self.current_round.deal_cards()
+    }
+
     pub fn print_player_scores(&self) {
         println!();
         println!("Scores:");
