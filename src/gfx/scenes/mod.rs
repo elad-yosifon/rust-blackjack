@@ -37,33 +37,29 @@ pub enum SceneType {
 }
 
 impl Scenes {
-    pub fn default() -> Self {
-        Self {
-            map: HashMap::default(),
-        }
-    }
 
-    pub fn from_game(game_ctx: &GameContext) -> Self {
+    pub fn from_context(ctx: &Context) -> Self {
+        //TODO: get rid of this hashmap
         let mut map: HashMap<SceneType, Rc<RefCell<dyn Scene>>> = HashMap::new();
 
         map.insert(
             SceneType::ChooseNumberOfPlayers,
-            Rc::new(RefCell::new(NumberOfPlayersScene::new(game_ctx))),
+            Rc::new(RefCell::new(NumberOfPlayersScene::new(ctx))),
         );
 
         map.insert(
             SceneType::PlayRound,
-            Rc::new(RefCell::new(PlayRoundScene::new(game_ctx))),
+            Rc::new(RefCell::new(PlayRoundScene::new(ctx))),
         );
 
         map.insert(
             SceneType::EndOfRound,
-            Rc::new(RefCell::new(EndOfRoundScene::new(game_ctx))),
+            Rc::new(RefCell::new(EndOfRoundScene::new(ctx))),
         );
 
         map.insert(
             SceneType::EndOfGame,
-            Rc::new(RefCell::new(EndOfGameScene::new(game_ctx))),
+            Rc::new(RefCell::new(EndOfGameScene::new(ctx))),
         );
 
         Self { map }

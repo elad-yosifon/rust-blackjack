@@ -18,8 +18,8 @@ pub struct NumberOfPlayersScene {
 }
 
 impl NumberOfPlayersScene {
-    pub fn new(game_ctx: &GameContext) -> Self {
-        let (_, w) = game_ctx.window_size;
+    pub fn new(ctx: &Context) -> Self {
+        let (_, w) = ctx.gfx.size();
 
         let mut txt = Text::new(TextFragment::new("Please choose number of players:"));
         txt.set_scale(PxScale::from(40.0));

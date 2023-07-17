@@ -1,2 +1,2 @@
 pub mod scenes;
-mod elements;
+pub mod elements;

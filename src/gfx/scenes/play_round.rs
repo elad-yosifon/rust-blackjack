@@ -1,32 +1,38 @@
-use std::ops::AddAssign;
+use std::ops::{AddAssign, Deref};
 
-use ggez::graphics::Text;
 use ggez::graphics::TextFragment;
 use ggez::graphics::{Canvas, DrawParam};
 use ggez::graphics::{Color, PxScale};
+use ggez::graphics::{Text};
 use ggez::input::mouse;
 use ggez::input::mouse::CursorIcon;
 use ggez::mint::Point2;
 use ggez::Context;
 
-use crate::gameplay::hand::HandState;
+use crate::gameplay::actor::ActorRole;
+use crate::gameplay::hand::{Hand, HandState};
 use crate::gfx::elements::drawable_element::DrawableElement;
 use crate::gfx::elements::utils::handle_hover_gfx;
 use crate::gfx::scenes::{Scene, SceneType};
 use crate::{at, GameContext};
-use crate::gameplay::actor::ActorRole;
+use crate::cards::card::{CardSymbol, Suit};
+use crate::gameplay::round::Round;
+use crate::gfx::elements::cards_sprite::CardsSprite;
 
 pub struct PlayRoundScene {
+    cards_sprite: CardsSprite,
     players: Vec<DrawableElement>,
     dealer: DrawableElement,
     hit_btn: DrawableElement,
     stay_btn: DrawableElement,
     split_btn: DrawableElement,
+    cards_layout: Vec<(CardSymbol, Suit, f32, f32)>
 }
 
 impl PlayRoundScene {
-    pub fn new(game_ctx: &GameContext) -> Self {
-        let (_, w) = game_ctx.window_size;
+    pub fn new(ctx: &Context) -> Self {
+        let (_, w) = ctx.gfx.size();
+
 
         let mut d = Text::new(TextFragment::new("Dealer"));
         d.set_scale(PxScale::from(40.0));
@@ -50,6 +56,7 @@ impl PlayRoundScene {
         split_btn.set_scale(PxScale::from(60.0));
 
         Self::_new(
+            CardsSprite::new(ctx),
             vec![
                 DrawableElement::new_text(p1, Point2::from([700., 600.])),
                 DrawableElement::new_text(p2, Point2::from([400., 650.])).hidden(),
@@ -63,6 +70,7 @@ impl PlayRoundScene {
     }
 
     fn _new(
+        cards_sprite:CardsSprite,
         players: Vec<DrawableElement>,
         dealer: DrawableElement,
         hit_btn: DrawableElement,
@@ -70,11 +78,13 @@ impl PlayRoundScene {
         split_btn: DrawableElement,
     ) -> Self {
         Self {
+            cards_sprite,
             players,
             dealer,
             hit_btn,
             stay_btn,
             split_btn,
+            cards_layout: vec![]
         }
     }
 }
@@ -151,6 +161,10 @@ impl Scene for PlayRoundScene {
                 round.hand_cursor.add_assign(1);
             }
         }
+
+        //TODO: implement cards layout
+        let mut cards_layout: Vec<(CardSymbol, Suit, f32, f32)> = vec![(CardSymbol::Ace,Suit::Heart, 10., 10.)];
+        self.cards_layout = cards_layout;
     }
 
     fn draw(&self, ctx: &mut Context, canvas: &mut Canvas) {
@@ -165,6 +179,10 @@ impl Scene for PlayRoundScene {
         render_de(ctx, canvas, &self.hit_btn);
         render_de(ctx, canvas, &self.stay_btn);
         render_de(ctx, canvas, &self.split_btn);
+
+        self.cards_layout.iter().for_each(|(symbol, suit, x, y)| {
+            self.cards_sprite.draw_card_at_point(canvas, symbol, suit, x, y);
+        })
     }
 }
 

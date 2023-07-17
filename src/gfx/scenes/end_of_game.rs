@@ -16,8 +16,8 @@ pub struct EndOfGameScene {
 }
 
 impl EndOfGameScene {
-    pub fn new(game_ctx: &GameContext) -> Self {
-        let (_, w) = game_ctx.window_size;
+    pub fn new(ctx: &Context) -> Self {
+        let (_, w) = ctx.gfx.size();
 
         let mut txt = Text::new(TextFragment::new("Until next time..."));
         txt.set_scale(PxScale::from(60.0));

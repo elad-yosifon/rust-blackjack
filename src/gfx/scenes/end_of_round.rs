@@ -18,8 +18,8 @@ pub struct EndOfRoundScene {
 }
 
 impl EndOfRoundScene {
-    pub fn new(game_ctx: &GameContext) -> Self {
-        let (_, w) = game_ctx.window_size;
+    pub fn new(ctx: &Context) -> Self {
+        let (_, w) = ctx.gfx.size();
 
         let mut txt = Text::new(TextFragment::new("Should we play another round?"));
         txt.set_scale(PxScale::from(40.0));
