@@ -1,16 +1,16 @@
-use ggez::graphics::Text;
-use ggez::graphics::TextFragment;
+use ggez::Context;
 use ggez::graphics::{Canvas, DrawParam};
 use ggez::graphics::{Color, PxScale};
+use ggez::graphics::Text;
+use ggez::graphics::TextFragment;
 use ggez::input::mouse;
 use ggez::input::mouse::CursorIcon;
 use ggez::mint::Point2;
-use ggez::Context;
 
+use crate::GameContext;
 use crate::gfx::elements::drawable_element::DrawableElement;
 use crate::gfx::elements::utils::handle_hover_gfx;
 use crate::gfx::scenes::{Scene, SceneType};
-use crate::GameContext;
 
 pub struct NumberOfPlayersScene {
     elements: Vec<DrawableElement>,
@@ -49,7 +49,7 @@ impl Scene for NumberOfPlayersScene {
     fn update(&mut self, game_ctx: &mut GameContext, ctx: &mut Context) {
         mouse::set_cursor_type(ctx, CursorIcon::Default);
 
-        for (i, element) in self.elements.iter().enumerate() {
+        for (i, element) in self.elements.iter_mut().enumerate() {
             if element.check_clicked(&ctx) {
                 let number_of_players = self.number_of_players[i];
                 game_ctx.start_game(number_of_players);

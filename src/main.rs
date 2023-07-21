@@ -5,16 +5,16 @@ use std::ops::{AddAssign, SubAssign};
 use std::path;
 use std::rc::Rc;
 
+use ggez::{Context, ContextBuilder, GameResult};
 use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event::{self, EventHandler};
 use ggez::glam::Vec2;
-use ggez::graphics::{self, BlendMode, Color, DrawParam, Drawable, Image};
-use ggez::{Context, ContextBuilder, GameResult};
+use ggez::graphics::{self, BlendMode, Color, Drawable, DrawParam, Image};
 
 use gfx::elements::cards_sprite::CardsSprite;
 
 use crate::gameplay::game::Game;
-use crate::gfx::scenes::{Scene, SceneType, Scenes};
+use crate::gfx::scenes::{Scene, Scenes, SceneType};
 
 mod cards;
 mod gameplay;
@@ -103,7 +103,7 @@ impl EventHandler for GameContext {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        println!("FPS: {}", ctx.time.fps());
+        // println!("FPS: {}", ctx.time.fps());
         let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
         canvas.set_blend_mode(BlendMode::PREMULTIPLIED);
         canvas.draw(&self.board, DrawParam::default().scale(Vec2::new(2., 2.)));

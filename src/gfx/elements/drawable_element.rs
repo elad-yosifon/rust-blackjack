@@ -1,7 +1,9 @@
-use ggez::event::MouseButton;
-use ggez::graphics::{Canvas, DrawParam, Drawable, GraphicsContext, Image, Rect, Text};
-use ggez::mint::Point2;
+use std::ops::BitOrAssign;
+
 use ggez::Context;
+use ggez::event::MouseButton;
+use ggez::graphics::{Canvas, Drawable, DrawParam, GraphicsContext, Image, Rect, Text};
+use ggez::mint::Point2;
 
 pub enum DrawableElementVisibility {
     Hidden,
@@ -69,6 +71,8 @@ pub struct DrawableElement {
 
     pub text: Option<Text>,
     pub image: Option<Image>,
+
+    clickable_bitmap: i8,
 }
 
 impl DrawableElement {
@@ -105,8 +109,27 @@ impl DrawableElement {
 }
 
 impl DrawableElement {
+    fn set_clickable_bitmap_mouse_over(&mut self) {
+        self.clickable_bitmap.bitor_assign(0b001);
+    }
+    fn set_clickable_bitmap_mouse_down(&mut self) {
+        self.clickable_bitmap.bitor_assign(0b010);
+    }
+    fn set_clickable_bitmap_mouse_up(&mut self) {
+        self.clickable_bitmap.bitor_assign(0b100);
+    }
+    fn clear_clickable_bitmap(&mut self) {
+        self.clickable_bitmap = 0;
+    }
+    fn clickable_bitmap_all_checked(&self) -> bool {
+        self.clickable_bitmap == 0b111
+    }
+}
+
+impl DrawableElement {
     pub fn new_text(text: Text, position: Point2<f32>) -> DrawableElement {
         Self {
+            clickable_bitmap: 0,
             position,
             image: None,
             text: Some(text),
@@ -119,6 +142,7 @@ impl DrawableElement {
 
     pub fn new_text_button(text: Text, position: Point2<f32>) -> DrawableElement {
         Self {
+            clickable_bitmap: 0,
             position,
             image: None,
             text: Some(text),
@@ -129,9 +153,13 @@ impl DrawableElement {
         }
     }
 
-    fn mouse_is_over(element: &DrawableElement, gfx: &GraphicsContext, mouse_pos: Point2<f32>) -> bool {
+    fn mouse_is_over(
+        element: &DrawableElement,
+        gfx: &GraphicsContext,
+        mouse_pos: Point2<f32>,
+    ) -> bool {
         if let Some(r) = element.dimensions(gfx) {
-            if r.contains(mouse_pos){
+            if r.contains(mouse_pos) {
                 return true;
             }
         }
@@ -139,13 +167,27 @@ impl DrawableElement {
     }
 
     #[allow(unused)]
-    pub fn check_clicked(&self, ctx: &Context) -> bool {
-        //TODO: be nice and support "click-zone" states
-
-        self.is_visible()
+    pub fn check_clicked(&mut self, ctx: &Context) -> bool {
+        if self.is_visible()
             && self.is_clickable()
-            && ctx.mouse.button_pressed(MouseButton::Left)
             && Self::mouse_is_over(self, &ctx.gfx, ctx.mouse.position())
+        {
+            self.set_clickable_bitmap_mouse_over();
+            if ctx.mouse.button_just_pressed(MouseButton::Left) {
+                self.set_clickable_bitmap_mouse_down();
+            } else if ctx.mouse.button_just_released(MouseButton::Left) {
+                self.set_clickable_bitmap_mouse_up();
+            }
+            if self.clickable_bitmap_all_checked() {
+                // ensuring one time click
+                self.clear_clickable_bitmap();
+                return true;
+            }
+            return false;
+        }
+
+        self.clear_clickable_bitmap();
+        false
     }
 
     #[allow(unused)]
@@ -154,7 +196,6 @@ impl DrawableElement {
             && self.is_hoverable()
             && Self::mouse_is_over(self, &ctx.gfx, ctx.mouse.position())
     }
-
 
     #[allow(unused)]
     pub fn is_hovered(&self) -> bool {

@@ -1,7 +1,7 @@
 use std::clone::Clone;
 use std::prelude::v1::derive;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum CardSymbol {
     Ace,
     Two,

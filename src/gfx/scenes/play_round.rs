@@ -1,23 +1,22 @@
-use std::ops::{AddAssign, Deref};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
-use ggez::graphics::TextFragment;
+use ggez::Context;
 use ggez::graphics::{Canvas, DrawParam};
 use ggez::graphics::{Color, PxScale};
-use ggez::graphics::{Text};
+use ggez::graphics::Text;
+use ggez::graphics::TextFragment;
 use ggez::input::mouse;
 use ggez::input::mouse::CursorIcon;
 use ggez::mint::Point2;
-use ggez::Context;
 
+use crate::{at, GameContext};
+use crate::cards::card::{CardSymbol, Suit};
 use crate::gameplay::actor::ActorRole;
 use crate::gameplay::hand::{Hand, HandState};
+use crate::gfx::elements::cards_sprite::CardsSprite;
 use crate::gfx::elements::drawable_element::DrawableElement;
 use crate::gfx::elements::utils::handle_hover_gfx;
 use crate::gfx::scenes::{Scene, SceneType};
-use crate::{at, GameContext};
-use crate::cards::card::{CardSymbol, Suit};
-use crate::gameplay::round::Round;
-use crate::gfx::elements::cards_sprite::CardsSprite;
 
 pub struct PlayRoundScene {
     cards_sprite: CardsSprite,
@@ -26,13 +25,12 @@ pub struct PlayRoundScene {
     hit_btn: DrawableElement,
     stay_btn: DrawableElement,
     split_btn: DrawableElement,
-    cards_layout: Vec<(CardSymbol, Suit, f32, f32)>
+    cards_layout: Vec<(CardSymbol, Suit, f32, f32)>,
 }
 
 impl PlayRoundScene {
     pub fn new(ctx: &Context) -> Self {
         let (_, w) = ctx.gfx.size();
-
 
         let mut d = Text::new(TextFragment::new("Dealer"));
         d.set_scale(PxScale::from(40.0));
@@ -70,7 +68,7 @@ impl PlayRoundScene {
     }
 
     fn _new(
-        cards_sprite:CardsSprite,
+        cards_sprite: CardsSprite,
         players: Vec<DrawableElement>,
         dealer: DrawableElement,
         hit_btn: DrawableElement,
@@ -84,7 +82,7 @@ impl PlayRoundScene {
             hit_btn,
             stay_btn,
             split_btn,
-            cards_layout: vec![]
+            cards_layout: vec![],
         }
     }
 }
@@ -162,8 +160,25 @@ impl Scene for PlayRoundScene {
             }
         }
 
-        //TODO: implement cards layout
-        let mut cards_layout: Vec<(CardSymbol, Suit, f32, f32)> = vec![(CardSymbol::Ace,Suit::Heart, 10., 10.)];
+        let mut cards_layout: Vec<(CardSymbol, Suit, f32, f32)> = vec![];
+        game_ctx
+            .game
+            .current_round
+            .actors
+            .iter()
+            .enumerate()
+            .for_each(|(actor_i, actor)| match actor.role {
+                ActorRole::Player => {
+                    actor.hands.iter().enumerate().for_each(|(hand_i, hand)| {
+                        let (anchor_x, anchor_y) = calculate_player_hand_location(actor_i, hand_i);
+                        push_card_layout(&mut cards_layout, hand, anchor_x, anchor_y);
+                    });
+                }
+                ActorRole::Dealer => {
+                    let (anchor_x, anchor_y) = (300., 100.);
+                    push_card_layout(&mut cards_layout, actor.hand_at(0), anchor_x, anchor_y);
+                }
+            });
         self.cards_layout = cards_layout;
     }
 
@@ -181,7 +196,8 @@ impl Scene for PlayRoundScene {
         render_de(ctx, canvas, &self.split_btn);
 
         self.cards_layout.iter().for_each(|(symbol, suit, x, y)| {
-            self.cards_sprite.draw_card_at_point(canvas, symbol, suit, x, y);
+            self.cards_sprite
+                .draw_card_at_point(canvas, symbol, suit, x, y);
         })
     }
 }
@@ -194,4 +210,38 @@ fn render_de(ctx: &mut Context, canvas: &mut Canvas, element: &DrawableElement) 
             element.draw(ctx, canvas, DrawParam::new().color(Color::WHITE));
         }
     }
+}
+
+const CARD_PADDING_RIGHT: f32 = 20.0;
+
+fn push_card_layout(
+    mut cards_layout: &mut Vec<(CardSymbol, Suit, f32, f32)>,
+    hand: &Hand,
+    anchor_x: f32,
+    anchor_y: f32,
+) {
+    hand.cards
+        .iter()
+        .enumerate()
+        .map(|(i, card)| {
+            let x = CARD_PADDING_RIGHT.mul(i.add(1) as f32).add(anchor_x);
+            (card.value, card.suit, x, anchor_y)
+        })
+        .for_each(|card_layout| cards_layout.push(card_layout));
+}
+
+fn calculate_player_hand_location(actor_i: usize, hand_i: usize) -> (f32, f32) {
+    let distance_to_left = (300.).mul(actor_i as f32);
+    let distance_to_top = (200.).mul(hand_i as f32);
+
+    let actor_y = match actor_i {
+        0 => 400_f32,
+        1 => 500_f32,
+        2 => 400_f32,
+        _ => unimplemented!("")
+    };
+    let (anchor_x, anchor_y) = (
+        600_f32.sub(distance_to_left),
+        actor_y.sub(distance_to_top));
+    (anchor_x, anchor_y)
 }

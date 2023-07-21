@@ -1,8 +1,9 @@
+use ggez::Context;
 use ggez::glam::Vec2;
 use ggez::graphics::{Canvas, DrawParam, Image};
-use ggez::Context;
+use ggez::mint::Point2;
 
-use crate::cards::card::{Card, CardSymbol, Suit};
+use crate::cards::card::{CardSymbol, Suit};
 
 pub struct CardsSprite {
     image: Image,
@@ -27,7 +28,14 @@ impl CardsSprite {
         }
     }
 
-    pub fn draw_card_at_point(&self, canvas: &mut Canvas, symbol:&CardSymbol, suit: &Suit, x: &f32, y: &f32) {
+    pub fn draw_card_at_point(
+        &self,
+        canvas: &mut Canvas,
+        symbol: &CardSymbol,
+        suit: &Suit,
+        x: &f32,
+        y: &f32,
+    ) {
         let row = Self::row_from_suit(suit);
         let column = Self::column_from_symbol(symbol);
         let rect = self.image.uv_rect(
@@ -36,7 +44,10 @@ impl CardsSprite {
             self.anchor_w,
             self.anchor_h,
         );
-        let draw_param = DrawParam::new().src(rect).dest(Vec2::new(*x, *y));
+        let draw_param = DrawParam::new()
+            .src(rect)
+            .scale(Vec2::new(0.75, 0.75))
+            .dest(Point2::from([*x, *y]));
         canvas.draw(&self.image, draw_param)
     }
 
