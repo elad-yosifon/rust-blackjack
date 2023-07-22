@@ -1,8 +1,7 @@
 use crate::at;
 use crate::cards::deck::Deck;
 use crate::gameplay::actor::{Actor, ActorRole};
-use crate::gameplay::blackjack::UserAction;
-use crate::gameplay::hand::{Hand, HandState};
+use crate::gameplay::hand::{Hand};
 
 pub struct Round {
     pub deck: Deck,
@@ -10,57 +9,6 @@ pub struct Round {
     pub actor_bets: Vec<i32>,
     pub actor_cursor: usize,
     pub hand_cursor: usize,
-}
-
-impl Round {
-
-    pub fn apply_player_action(&mut self) {
-        // let actor = at!(mut self.actors, self.actor_cursor);
-        // if let ActorRole::Player = actor.role {
-        //     let hand_count = actor.hands.len();
-        //     if hand_cursor >= hand_count {
-        //         hand_cursor = 0;
-        //         actor_cursor += 1;
-        //         continue;
-        //     }
-        //
-        //     let hand = actor.hand_at_mut(hand_cursor);
-        //     match hand.state {
-        //         HandState::Finished => {
-        //             hand_cursor += 1;
-        //         }
-        //         HandState::Bust => {
-        //             println!("Hand --> BUST \n");
-        //             hand_cursor += 1;
-        //         }
-        //         HandState::Blackjack => {
-        //             println!("Hand --> BlackJack! \n");
-        //             hand_cursor += 1;
-        //         }
-        //         HandState::Undefined => {
-        //             match hand.prompt_user_action(&actor_name, hand_cursor) {
-        //                 UserAction::Hit => {
-        //                     println!("Hand --> HIT \n");
-        //                     hand.deal_card(self.deck.draw_card());
-        //                     self.update();
-        //                 }
-        //                 UserAction::Split => {
-        //                     println!("Hand --> SPLIT \n");
-        //                     let new_hand =
-        //                         hand.split(self.deck.draw_card(), self.deck.draw_card());
-        //                     actor.hands.insert(hand_cursor + 1, new_hand);
-        //                     self.update();
-        //                 }
-        //                 UserAction::Stay => {
-        //                     println!("Hand --> STAY \n");
-        //                     hand.state = HandState::Finished;
-        //                     hand_cursor += 1;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-    }
 }
 
 #[allow(clippy::derivable_impls)]
@@ -79,43 +27,6 @@ impl Default for Round {
 impl Round {
     pub fn play(&mut self) {
 
-        // simulate_think!(2);
-        //
-        // self.dealer_hand_mut().card_at_mut(1).reveal();
-        //
-        // self.update();
-        //
-        // simulate_think!(2);
-        //
-        // loop {
-        //     let dealer_hand = self.dealer_hand();
-        //     match dealer_hand.state {
-        //         HandState::Finished => unreachable!(),
-        //         HandState::Bust => {
-        //             println!("Dealer --> BUST \n");
-        //             break;
-        //         }
-        //         HandState::Blackjack => {
-        //             println!("Dealer --> BLACKJACK! \n");
-        //             break;
-        //         }
-        //         HandState::Undefined => match self.dealer_hand().sum {
-        //             1..17 => {
-        //                 println!("Dealer --> HIT \n");
-        //                 let card = self.deck.draw_card();
-        //                 self.dealer_hand_mut().deal_card(card);
-        //                 simulate_think!(2);
-        //                 self.update();
-        //             }
-        //             17..21 => {
-        //                 println!("Dealer --> STAY \n");
-        //                 self.dealer_hand_mut().state = HandState::Finished;
-        //                 break;
-        //             }
-        //             _ => unreachable!(),
-        //         },
-        //     }
-        // }
     }
 
     pub fn deal_cards(&mut self) {

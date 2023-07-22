@@ -1,22 +1,24 @@
 use std::ops::{Add, AddAssign, Mul, Sub};
+use std::time::{Duration, Instant};
 
-use ggez::Context;
-use ggez::graphics::{Canvas, DrawParam};
-use ggez::graphics::{Color, PxScale};
 use ggez::graphics::Text;
 use ggez::graphics::TextFragment;
+use ggez::graphics::{Canvas, DrawParam};
+use ggez::graphics::{Color, PxScale};
 use ggez::input::mouse;
 use ggez::input::mouse::CursorIcon;
 use ggez::mint::Point2;
+use ggez::Context;
 
-use crate::{at, GameContext};
 use crate::cards::card::{CardSymbol, Suit};
 use crate::gameplay::actor::ActorRole;
 use crate::gameplay::hand::{Hand, HandState};
+use crate::gameplay::round::Round;
 use crate::gfx::elements::cards_sprite::CardsSprite;
 use crate::gfx::elements::drawable_element::DrawableElement;
 use crate::gfx::elements::utils::handle_hover_gfx;
 use crate::gfx::scenes::{Scene, SceneType};
+use crate::{at, GameContext};
 
 pub struct PlayRoundScene {
     cards_sprite: CardsSprite,
@@ -26,6 +28,27 @@ pub struct PlayRoundScene {
     stay_btn: DrawableElement,
     split_btn: DrawableElement,
     cards_layout: Vec<(CardSymbol, Suit, f32, f32)>,
+    thinking_until: Option<Instant>,
+}
+
+impl PlayRoundScene {
+    fn done_thinking(&mut self) -> bool {
+        if let Some(thinking_until) = self.thinking_until {
+            let now = Instant::now();
+            if now.ge(&thinking_until) {
+                self.thinking_until = None;
+            }
+        }
+        self.not_thinking()
+    }
+
+    fn not_thinking(&self) -> bool {
+        self.thinking_until.is_none()
+    }
+
+    fn think_for_a_while(&mut self) {
+        self.thinking_until = Some(Instant::now().add(Duration::from_millis(2000)));
+    }
 }
 
 impl PlayRoundScene {
@@ -76,6 +99,7 @@ impl PlayRoundScene {
         split_btn: DrawableElement,
     ) -> Self {
         Self {
+            thinking_until: None,
             cards_sprite,
             players,
             dealer,
@@ -104,7 +128,11 @@ impl Scene for PlayRoundScene {
         let round = &mut game_ctx.game.current_round;
 
         if round.actor_cursor >= round.actors.len() {
-            game_ctx.current_scene = SceneType::RoundSummary;
+            if self.done_thinking() {
+                game_ctx.current_scene = SceneType::RoundSummary;
+            } else if self.not_thinking() {
+                self.think_for_a_while();
+            }
             return;
         }
 
@@ -112,18 +140,48 @@ impl Scene for PlayRoundScene {
         let dealer_turn = matches!(actor.role, ActorRole::Dealer);
 
         if round.hand_cursor >= actor.hands.len() {
-            round.actor_cursor.add_assign(1);
-            round.hand_cursor = 0;
+            advance_to_next_actor(round);
             return;
         }
 
         let hand = actor.hand_at_mut(round.hand_cursor);
 
-        // show/hide buttons
         if dealer_turn {
             self.hit_btn.hide();
             self.stay_btn.hide();
             self.split_btn.hide();
+            // show both dealer cards
+            hand.card_at_mut(1).reveal();
+
+            if self.not_thinking() {
+                self.think_for_a_while();
+            } else if self.done_thinking() {
+                match hand.state {
+                    HandState::Finished => unreachable!(),
+                    HandState::Bust | HandState::Blackjack => {
+                        advance_to_next_actor(round);
+                        if self.not_thinking() {
+                            self.think_for_a_while();
+                        }
+                    }
+                    HandState::Undefined => match hand.sum {
+                        1..17 => {
+                            hand.deal_card(round.deck.draw_card());
+                            round.update();
+                            if self.not_thinking() {
+                                self.think_for_a_while();
+                            }
+                        }
+                        17..21 => {
+                            hand.state = HandState::Finished;
+                            if self.not_thinking() {
+                                self.think_for_a_while();
+                            }
+                        }
+                        _ => unreachable!(),
+                    },
+                }
+            }
         } else {
             self.hit_btn.show();
             self.stay_btn.show();
@@ -132,33 +190,30 @@ impl Scene for PlayRoundScene {
             } else {
                 self.split_btn.hide();
             }
+
+            match hand.state {
+                HandState::Undefined => {
+                    if self.hit_btn.check_clicked(ctx) {
+                        hand.deal_card(round.deck.draw_card());
+                        round.update();
+                    } else if self.stay_btn.check_clicked(ctx) {
+                        hand.state = HandState::Finished;
+                        round.hand_cursor.add_assign(1);
+                    } else if self.split_btn.check_clicked(ctx) {
+                        let new_hand = hand.split(round.deck.draw_card(), round.deck.draw_card());
+                        actor.hands.insert(round.hand_cursor + 1, new_hand);
+                        round.update();
+                    }
+                }
+                HandState::Finished | HandState::Bust | HandState::Blackjack => {
+                    round.hand_cursor.add_assign(1);
+                }
+            }
         }
 
         handle_hover_gfx(ctx, &mut self.hit_btn);
         handle_hover_gfx(ctx, &mut self.stay_btn);
         handle_hover_gfx(ctx, &mut self.split_btn);
-
-        match hand.state {
-            HandState::Undefined => {
-                if self.hit_btn.check_clicked(ctx) {
-                    println!("Hand --> HIT \n");
-                    hand.deal_card(round.deck.draw_card());
-                    round.update();
-                } else if self.stay_btn.check_clicked(ctx) {
-                    println!("Hand --> STAY \n");
-                    hand.state = HandState::Finished;
-                    round.hand_cursor.add_assign(1);
-                } else if self.split_btn.check_clicked(ctx) {
-                    println!("Hand --> SPLIT \n");
-                    let new_hand = hand.split(round.deck.draw_card(), round.deck.draw_card());
-                    actor.hands.insert(round.hand_cursor + 1, new_hand);
-                    round.update();
-                }
-            }
-            HandState::Finished | HandState::Bust | HandState::Blackjack => {
-                round.hand_cursor.add_assign(1);
-            }
-        }
 
         let mut cards_layout: Vec<(CardSymbol, Suit, f32, f32)> = vec![];
         game_ctx
@@ -179,6 +234,7 @@ impl Scene for PlayRoundScene {
                     push_card_layout(&mut cards_layout, actor.hand_at(0), anchor_x, anchor_y);
                 }
             });
+
         self.cards_layout = cards_layout;
     }
 
@@ -222,6 +278,7 @@ fn push_card_layout(
 ) {
     hand.cards
         .iter()
+        .filter(|card| card.revealed)
         .enumerate()
         .map(|(i, card)| {
             let x = CARD_PADDING_RIGHT.mul(i.add(1) as f32).add(anchor_x);
@@ -238,10 +295,13 @@ fn calculate_player_hand_location(actor_i: usize, hand_i: usize) -> (f32, f32) {
         0 => 400_f32,
         1 => 500_f32,
         2 => 400_f32,
-        _ => unimplemented!("")
+        _ => unimplemented!(""),
     };
-    let (anchor_x, anchor_y) = (
-        600_f32.sub(distance_to_left),
-        actor_y.sub(distance_to_top));
+    let (anchor_x, anchor_y) = (600_f32.sub(distance_to_left), actor_y.sub(distance_to_top));
     (anchor_x, anchor_y)
+}
+
+fn advance_to_next_actor(round: &mut Round) {
+    round.actor_cursor.add_assign(1);
+    round.hand_cursor = 0;
 }
